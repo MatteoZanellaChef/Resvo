@@ -1,16 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { ServiceType } from '@/types';
+import { ServiceType, Reservation } from '@/types';
 import { CalendarView } from '@/components/calendar/calendar-view';
 import { ServiceToggle } from '@/components/calendar/service-toggle';
 import { DayDetailView } from '@/components/calendar/day-detail-view';
+import { ReservationFormDialog } from '@/components/reservations/reservation-form-dialog';
 import { mockReservations, mockRestaurant } from '@/lib/mock-data';
+import { Toaster } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 export default function HomePage() {
+    const [reservations, setReservations] = useState<Reservation[]>(mockReservations);
     const [selectedService, setSelectedService] = useState<ServiceType>('dinner');
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [detailViewOpen, setDetailViewOpen] = useState(false);
+    const [reservationFormOpen, setReservationFormOpen] = useState(false);
+    const [prefilledDate, setPrefilledDate] = useState<Date | null>(null);
+    const [prefilledService, setPrefilledService] = useState<ServiceType>('dinner');
 
     const maxCapacity = selectedService === 'lunch'
         ? mockRestaurant.maxCapacityLunch
@@ -19,6 +26,17 @@ export default function HomePage() {
     const handleDayClick = (date: Date) => {
         setSelectedDate(date);
         setDetailViewOpen(true);
+    };
+
+    const handleAddReservation = (date: Date, service: ServiceType) => {
+        setPrefilledDate(date);
+        setPrefilledService(service);
+        setDetailViewOpen(false);
+        setReservationFormOpen(true);
+    };
+
+    const handleSaveReservation = (data: Partial<Reservation>) => {
+        setReservations((prev) => [...prev, data as Reservation]);
     };
 
     return (
@@ -40,7 +58,7 @@ export default function HomePage() {
 
             {/* Calendar */}
             <CalendarView
-                reservations={mockReservations}
+                reservations={reservations}
                 selectedService={selectedService}
                 maxCapacity={maxCapacity}
                 onDayClick={handleDayClick}
@@ -50,12 +68,35 @@ export default function HomePage() {
             <DayDetailView
                 date={selectedDate}
                 serviceType={selectedService}
-                reservations={mockReservations}
+                reservations={reservations}
                 maxCapacityLunch={mockRestaurant.maxCapacityLunch}
                 maxCapacityDinner={mockRestaurant.maxCapacityDinner}
                 open={detailViewOpen}
                 onClose={() => setDetailViewOpen(false)}
+                onAddReservation={handleAddReservation}
             />
+
+            {/* Reservation form dialog */}
+            <ReservationFormDialog
+                open={reservationFormOpen}
+                onOpenChange={setReservationFormOpen}
+                reservation={prefilledDate ? {
+                    id: '',
+                    restaurantId: 'restaurant-1',
+                    date: prefilledDate,
+                    time: '',
+                    serviceType: prefilledService,
+                    customerName: '',
+                    customerPhone: '',
+                    numGuests: 2,
+                    status: 'confirmed',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                } as Reservation : null}
+                onSave={handleSaveReservation}
+            />
+
+            <Toaster />
         </div>
     );
 }
