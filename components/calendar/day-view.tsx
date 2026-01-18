@@ -268,7 +268,7 @@ export function DayView({
                     onClick={() => onAddReservation?.(currentDate, selectedService)}
                     size="lg"
                     className={cn(
-                        'fixed bottom-20 right-4 lg:bottom-6 lg:right-6',
+                        'fixed bottom-[calc(5rem+env(safe-area-inset-bottom)+1rem)] right-4 lg:bottom-6 lg:right-6',
                         'h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-lg',
                         'transition-all duration-300 hover:scale-110 active:scale-95',
                         'z-50',

@@ -149,7 +149,7 @@ export function ReservationFormDialog({
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
-                        {reservation ? 'Modifica Prenotazione' : 'Nuova Prenotazione'}
+                        {reservation?.id ? 'Modifica Prenotazione' : 'Nuova Prenotazione'}
                     </DialogTitle>
                     <DialogDescription>
                         Inserisci i dettagli della prenotazione
@@ -349,7 +349,7 @@ export function ReservationFormDialog({
                         </Button>
                         <Button type="submit">
                             <Save className="mr-2 h-4 w-4" />
-                            {reservation ? 'Aggiorna' : 'Crea'} Prenotazione
+                            {reservation?.id ? 'Aggiorna' : 'Inserisci'} Prenotazione
                         </Button>
                     </div>
                 </form>
