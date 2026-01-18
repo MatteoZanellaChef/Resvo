@@ -25,7 +25,7 @@ export default function DashboardLayout({
                 <BottomNav />
 
                 {/* Main content */}
-                <div className="lg:pl-64 pb-20 lg:pb-0">
+                <div className="lg:pl-64 pb-32 lg:pb-0 safe-area-top">
                     <Header onMobileMenuToggle={() => setMobileMenuOpen(true)} />
 
                     <main className="p-4 lg:p-6">
