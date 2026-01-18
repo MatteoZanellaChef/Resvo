@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { isSameDay, format } from 'date-fns';
 import { ChevronLeft, ChevronRight, Plus, Users, Phone, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ interface DayViewProps {
     maxCapacity: number;
     onDayClick: (date: Date) => void;
     onAddReservation?: (date: Date, service: ServiceType) => void;
+    initialDate?: Date | null; // Optional initial date to display
 }
 
 export function DayView({
@@ -25,8 +26,16 @@ export function DayView({
     maxCapacity,
     onDayClick,
     onAddReservation,
+    initialDate,
 }: DayViewProps) {
-    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentDate, setCurrentDate] = useState(initialDate || new Date());
+
+    // Sync with initialDate when it changes (e.g., when clicking a day from calendar)
+    useEffect(() => {
+        if (initialDate) {
+            setCurrentDate(initialDate);
+        }
+    }, [initialDate]);
 
     const handlePreviousDay = () => {
         const newDate = new Date(currentDate);
@@ -229,7 +238,7 @@ export function DayView({
                     onClick={() => onAddReservation(currentDate, selectedService)}
                     size="lg"
                     className={cn(
-                        'fixed bottom-20 right-4 sm:bottom-6 sm:right-6',
+                        'fixed bottom-4 right-4 sm:bottom-6 sm:right-6',
                         'h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-lg',
                         'transition-all duration-300 hover:scale-110 active:scale-95',
                         'z-50'

@@ -6,7 +6,6 @@ import { CalendarView } from '@/components/calendar/calendar-view';
 import { WeekView } from '@/components/calendar/week-view';
 import { DayView } from '@/components/calendar/day-view';
 import { ServiceToggle } from '@/components/calendar/service-toggle';
-import { DayDetailView } from '@/components/calendar/day-detail-view';
 import { ReservationFormDialog } from '@/components/reservations/reservation-form-dialog';
 import { mockReservations, mockRestaurant } from '@/lib/mock-data';
 import { Toaster } from '@/components/ui/sonner';
@@ -20,7 +19,6 @@ export default function HomePage() {
     const [reservations, setReservations] = useState<Reservation[]>(mockReservations);
     const [selectedService, setSelectedService] = useState<ServiceType>('dinner');
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [detailViewOpen, setDetailViewOpen] = useState(false);
     const [reservationFormOpen, setReservationFormOpen] = useState(false);
     const [prefilledDate, setPrefilledDate] = useState<Date | null>(null);
     const [prefilledService, setPrefilledService] = useState<ServiceType>('dinner');
@@ -32,13 +30,12 @@ export default function HomePage() {
 
     const handleDayClick = (date: Date) => {
         setSelectedDate(date);
-        setDetailViewOpen(true);
+        setViewType('day'); // Switch to day view instead of opening modal
     };
 
     const handleAddReservation = (date: Date, service: ServiceType) => {
         setPrefilledDate(date);
         setPrefilledService(service);
-        setDetailViewOpen(false);
         setReservationFormOpen(true);
     };
 
@@ -123,11 +120,12 @@ export default function HomePage() {
                         maxCapacity={maxCapacity}
                         onDayClick={handleDayClick}
                         onAddReservation={handleAddReservation}
+                        initialDate={selectedDate}
                     />
                 )}
             </div>
-            {/* Day detail modal */}
-            <DayDetailView
+            {/* Day detail modal - Disabled, now using DayView directly */}
+            {/* <DayDetailView
                 date={selectedDate}
                 serviceType={selectedService}
                 reservations={reservations}
@@ -136,7 +134,7 @@ export default function HomePage() {
                 open={detailViewOpen}
                 onClose={() => setDetailViewOpen(false)}
                 onAddReservation={handleAddReservation}
-            />
+            /> */}
 
             {/* Reservation form dialog */}
             <ReservationFormDialog

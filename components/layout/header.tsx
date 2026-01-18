@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -8,12 +9,17 @@ interface HeaderProps {
 }
 
 export function Header({ onMobileMenuToggle }: HeaderProps) {
-    const currentDate = new Date().toLocaleDateString('it-IT', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
+    const [currentDate, setCurrentDate] = useState<string>('');
+
+    useEffect(() => {
+        // Set date only on client side to avoid hydration mismatch
+        setCurrentDate(new Date().toLocaleDateString('it-IT', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        }));
+    }, []);
 
     return (
         <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
@@ -30,9 +36,11 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
 
             {/* Current date */}
             <div className="flex-1">
-                <p className="text-sm text-muted-foreground capitalize hidden sm:block">
-                    {currentDate}
-                </p>
+                {currentDate && (
+                    <p className="text-sm text-muted-foreground capitalize hidden sm:block">
+                        {currentDate}
+                    </p>
+                )}
             </div>
         </header>
     );
