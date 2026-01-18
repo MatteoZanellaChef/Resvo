@@ -268,12 +268,12 @@ export function DayView({
                     onClick={() => onAddReservation?.(currentDate, selectedService)}
                     size="lg"
                     className={cn(
-                        'fixed bottom-4 right-4 sm:bottom-6 sm:right-6',
+                        'fixed bottom-20 right-4 lg:bottom-6 lg:right-6',
                         'h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-lg',
                         'transition-all duration-300 hover:scale-110 active:scale-95',
                         'z-50',
                         // Hide on desktop when bottom actions are visible
-                        isBottomActionsVisible && 'sm:opacity-0 sm:pointer-events-none sm:translate-y-4'
+                        isBottomActionsVisible && 'lg:opacity-0 lg:pointer-events-none lg:translate-y-4'
                     )}
                 >
                     <Plus className="h-6 w-6 sm:h-7 sm:w-7" />
