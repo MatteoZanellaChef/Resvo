@@ -2,10 +2,13 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Restaurant, RoomSpace, Table } from '@/types';
-import { mockRestaurant, mockTables } from '@/lib/mock-data';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { restaurantService } from '@/lib/supabase/services/restaurant.service';
+import { spacesService } from '@/lib/supabase/services/spaces.service';
+import { tablesService } from '@/lib/supabase/services/tables.service';
 
 interface RestaurantSettingsContextType {
-    restaurant: Restaurant;
+    restaurant: Restaurant | null;
     spaces: RoomSpace[];
     tables: Table[];
     updateSettings: (settings: Partial<Restaurant>) => Promise<void>;
@@ -16,94 +19,85 @@ interface RestaurantSettingsContextType {
     updateTable: (id: string, updates: Partial<Omit<Table, 'id' | 'restaurantId'>>) => Promise<void>;
     deleteTable: (id: string) => Promise<void>;
     isLoading: boolean;
+    refreshAll: () => Promise<void>;
 }
 
 const RestaurantSettingsContext = createContext<RestaurantSettingsContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'resvo_restaurant_settings';
-const SPACES_STORAGE_KEY = 'resvo_room_spaces';
-const TABLES_STORAGE_KEY = 'resvo_tables';
-
-// Default spaces
-const DEFAULT_SPACES: RoomSpace[] = [
-    { id: 'space-1', value: 'interno', label: 'Interno', isDefault: true, order: 1 },
-    { id: 'space-2', value: 'esterno', label: 'Esterno', isDefault: true, order: 2 },
-    { id: 'space-3', value: 'veranda', label: 'Veranda', isDefault: true, order: 3 },
-];
-
 export function RestaurantSettingsProvider({ children }: { children: ReactNode }) {
-    const [restaurant, setRestaurant] = useState<Restaurant>(mockRestaurant);
-    const [spaces, setSpaces] = useState<RoomSpace[]>(DEFAULT_SPACES);
+    const { user, loading: authLoading } = useAuth();
+    const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+    const [spaces, setSpaces] = useState<RoomSpace[]>([]);
     const [tables, setTables] = useState<Table[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Load settings, spaces, and tables from localStorage on mount
+    // Load all data when user is authenticated
     useEffect(() => {
-        const loadSettings = () => {
-            try {
-                // Load restaurant settings
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) {
-                    const parsedSettings = JSON.parse(stored);
-                    setRestaurant({ ...mockRestaurant, ...parsedSettings });
-                }
+        if (authLoading) return;
 
-                // Load spaces
-                const storedSpaces = localStorage.getItem(SPACES_STORAGE_KEY);
-                if (storedSpaces) {
-                    const parsedSpaces = JSON.parse(storedSpaces);
-                    setSpaces(parsedSpaces);
-                } else {
-                    // Initialize with default spaces
-                    localStorage.setItem(SPACES_STORAGE_KEY, JSON.stringify(DEFAULT_SPACES));
-                }
+        if (user) {
+            loadAllData();
+        } else {
+            setIsLoading(false);
+        }
+    }, [user, authLoading]);
 
-                // Load tables
-                const storedTables = localStorage.getItem(TABLES_STORAGE_KEY);
-                if (storedTables) {
-                    const parsedTables = JSON.parse(storedTables);
-                    setTables(parsedTables);
-                } else {
-                    // Initialize with mock tables
-                    localStorage.setItem(TABLES_STORAGE_KEY, JSON.stringify(mockTables));
-                    setTables(mockTables);
-                }
-            } catch (error) {
-                console.error('Error loading restaurant settings:', error);
-            } finally {
-                setIsLoading(false);
+    const loadAllData = async () => {
+        if (!user) return;
+
+        try {
+            setIsLoading(true);
+
+            // Load or create restaurant
+            const restaurantData = await restaurantService.getOrCreateRestaurant(user.id);
+            setRestaurant(restaurantData);
+
+            if (restaurantData) {
+                // Load spaces and tables in parallel
+                const [spacesData, tablesData] = await Promise.all([
+                    spacesService.getSpaces(restaurantData.id),
+                    tablesService.getTables(restaurantData.id),
+                ]);
+
+                setSpaces(spacesData);
+                setTables(tablesData);
             }
-        };
+        } catch (error) {
+            console.error('Error loading restaurant data:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-        loadSettings();
-    }, []);
+    const refreshAll = async () => {
+        await loadAllData();
+    };
 
     const updateSettings = async (settings: Partial<Restaurant>) => {
+        if (!restaurant) throw new Error('No restaurant loaded');
+
         try {
-            const updated = { ...restaurant, ...settings };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-            setRestaurant(updated);
+            await restaurantService.updateRestaurant(restaurant.id, settings);
+
+            // Update local state
+            setRestaurant({ ...restaurant, ...settings });
         } catch (error) {
-            console.error('Error updating restaurant settings:', error);
+            console.error('Error updating settings:', error);
             throw error;
         }
     };
 
     const addSpace = async (space: Omit<RoomSpace, 'id'>) => {
+        if (!restaurant) throw new Error('No restaurant loaded');
+
         try {
             // Check for duplicate value
             if (spaces.some(s => s.value === space.value)) {
                 throw new Error('Esiste già uno spazio con questo valore');
             }
 
-            const newSpace: RoomSpace = {
-                ...space,
-                id: `space-${Date.now()}`,
-            };
-
-            const updated = [...spaces, newSpace];
-            localStorage.setItem(SPACES_STORAGE_KEY, JSON.stringify(updated));
-            setSpaces(updated);
+            const newSpace = await spacesService.addSpace(restaurant.id, space);
+            setSpaces([...spaces, newSpace]);
         } catch (error) {
             console.error('Error adding space:', error);
             throw error;
@@ -112,20 +106,20 @@ export function RestaurantSettingsProvider({ children }: { children: ReactNode }
 
     const updateSpace = async (id: string, updates: Partial<Omit<RoomSpace, 'id' | 'isDefault'>>) => {
         try {
-            const updated = spaces.map(space =>
-                space.id === id ? { ...space, ...updates } : space
-            );
-
             // Check for duplicate value if value is being updated
             if (updates.value) {
-                const duplicates = updated.filter(s => s.value === updates.value);
-                if (duplicates.length > 1) {
+                const duplicates = spaces.filter(s => s.value === updates.value && s.id !== id);
+                if (duplicates.length > 0) {
                     throw new Error('Esiste già uno spazio con questo valore');
                 }
             }
 
-            localStorage.setItem(SPACES_STORAGE_KEY, JSON.stringify(updated));
-            setSpaces(updated);
+            await spacesService.updateSpace(id, updates);
+
+            // Update local state
+            setSpaces(spaces.map(space =>
+                space.id === id ? { ...space, ...updates } : space
+            ));
         } catch (error) {
             console.error('Error updating space:', error);
             throw error;
@@ -134,9 +128,8 @@ export function RestaurantSettingsProvider({ children }: { children: ReactNode }
 
     const deleteSpace = async (id: string) => {
         try {
-            const updated = spaces.filter(space => space.id !== id);
-            localStorage.setItem(SPACES_STORAGE_KEY, JSON.stringify(updated));
-            setSpaces(updated);
+            await spacesService.deleteSpace(id);
+            setSpaces(spaces.filter(space => space.id !== id));
         } catch (error) {
             console.error('Error deleting space:', error);
             throw error;
@@ -144,16 +137,11 @@ export function RestaurantSettingsProvider({ children }: { children: ReactNode }
     };
 
     const addTable = async (table: Omit<Table, 'id' | 'restaurantId'>) => {
-        try {
-            const newTable: Table = {
-                ...table,
-                id: `table-${Date.now()}`,
-                restaurantId: restaurant.id,
-            };
+        if (!restaurant) throw new Error('No restaurant loaded');
 
-            const updated = [...tables, newTable];
-            localStorage.setItem(TABLES_STORAGE_KEY, JSON.stringify(updated));
-            setTables(updated);
+        try {
+            const newTable = await tablesService.addTable(restaurant.id, table);
+            setTables([...tables, newTable]);
         } catch (error) {
             console.error('Error adding table:', error);
             throw error;
@@ -162,12 +150,12 @@ export function RestaurantSettingsProvider({ children }: { children: ReactNode }
 
     const updateTable = async (id: string, updates: Partial<Omit<Table, 'id' | 'restaurantId'>>) => {
         try {
-            const updated = tables.map(table =>
-                table.id === id ? { ...table, ...updates } : table
-            );
+            await tablesService.updateTable(id, updates);
 
-            localStorage.setItem(TABLES_STORAGE_KEY, JSON.stringify(updated));
-            setTables(updated);
+            // Update local state
+            setTables(tables.map(table =>
+                table.id === id ? { ...table, ...updates } : table
+            ));
         } catch (error) {
             console.error('Error updating table:', error);
             throw error;
@@ -176,31 +164,40 @@ export function RestaurantSettingsProvider({ children }: { children: ReactNode }
 
     const deleteTable = async (id: string) => {
         try {
-            const updated = tables.filter(table => table.id !== id);
-            localStorage.setItem(TABLES_STORAGE_KEY, JSON.stringify(updated));
-            setTables(updated);
+            await tablesService.deleteTable(id);
+            setTables(tables.filter(table => table.id !== id));
         } catch (error) {
             console.error('Error deleting table:', error);
             throw error;
         }
     };
 
+    // Provide a default restaurant object while loading to avoid null issues
+    const contextValue: RestaurantSettingsContextType = {
+        restaurant: restaurant || {
+            id: '',
+            name: 'Caricamento...',
+            maxCapacityLunch: 80,
+            maxCapacityDinner: 100,
+            defaultTableDuration: 120,
+            openingHours: {},
+            createdAt: new Date(),
+        },
+        spaces,
+        tables,
+        updateSettings,
+        addSpace,
+        updateSpace,
+        deleteSpace,
+        addTable,
+        updateTable,
+        deleteTable,
+        isLoading,
+        refreshAll,
+    };
+
     return (
-        <RestaurantSettingsContext.Provider
-            value={{
-                restaurant,
-                spaces,
-                tables,
-                updateSettings,
-                addSpace,
-                updateSpace,
-                deleteSpace,
-                addTable,
-                updateTable,
-                deleteTable,
-                isLoading
-            }}
-        >
+        <RestaurantSettingsContext.Provider value={contextValue}>
             {children}
         </RestaurantSettingsContext.Provider>
     );

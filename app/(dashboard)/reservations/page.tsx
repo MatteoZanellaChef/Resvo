@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Reservation, ServiceType, ReservationStatus } from '@/types';
-import { mockReservations } from '@/lib/mock-data';
 import { ReservationCard } from '@/components/reservations/reservation-card';
 import { ReservationFormDialog } from '@/components/reservations/reservation-form-dialog';
 import { Button } from '@/components/ui/button';
@@ -11,18 +10,44 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card } from '@/components/ui/card';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter, Loader2 } from 'lucide-react';
+import { useRestaurantSettings } from '@/lib/contexts/restaurant-settings-context';
+import { reservationsService } from '@/lib/supabase/services/reservations.service';
 
 export default function ReservationsPage() {
-    const [reservations, setReservations] = useState<Reservation[]>(mockReservations);
+    const { restaurant, isLoading: settingsLoading } = useRestaurantSettings();
+    const [reservations, setReservations] = useState<Reservation[]>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
+    const [isLoadingReservations, setIsLoadingReservations] = useState(true);
 
     // Filters
     const [searchQuery, setSearchQuery] = useState('');
     const [serviceFilter, setServiceFilter] = useState<ServiceType | 'all'>('all');
     const [statusFilter, setStatusFilter] = useState<ReservationStatus | 'all'>('all');
     const [sortBy, setSortBy] = useState<'date' | 'time'>('date');
+
+    // Load reservations
+    useEffect(() => {
+        if (restaurant && restaurant.id) {
+            loadReservations();
+        }
+    }, [restaurant]);
+
+    const loadReservations = async () => {
+        if (!restaurant) return;
+
+        try {
+            setIsLoadingReservations(true);
+            const data = await reservationsService.getReservations(restaurant.id);
+            setReservations(data);
+        } catch (error) {
+            console.error('Error loading reservations:', error);
+            toast.error('Errore durante il caricamento');
+        } finally {
+            setIsLoadingReservations(false);
+        }
+    };
 
     // Filter and search logic
     const filteredReservations = useMemo(() => {
@@ -92,20 +117,49 @@ export default function ReservationsPage() {
         setIsDialogOpen(true);
     };
 
-    const handleDelete = (id: string) => {
-        setReservations((prev) => prev.filter((r) => r.id !== id));
-        toast.success('Prenotazione eliminata');
-    };
+    const handleDelete = async (id: string) => {
+        if (!restaurant) return;
 
-    const handleSave = (data: Partial<Reservation>) => {
-        if (editingReservation) {
-            setReservations((prev) =>
-                prev.map((r) => (r.id === editingReservation.id ? { ...r, ...data } : r))
-            );
-        } else {
-            setReservations((prev) => [...prev, data as Reservation]);
+        try {
+            await reservationsService.deleteReservation(id);
+            toast.success('Prenotazione eliminata');
+            await loadReservations();
+        } catch (error) {
+            console.error('Error deleting reservation:', error);
+            toast.error('Errore durante l\'eliminazione');
         }
     };
+
+    const handleSave = async (data: Partial<Reservation>) => {
+        if (!restaurant) return;
+
+        try {
+            if (editingReservation) {
+                await reservationsService.updateReservation(editingReservation.id, data);
+                toast.success('Prenotazione aggiornata');
+            } else {
+                await reservationsService.createReservation(restaurant.id, data as any);
+                toast.success('Prenotazione creata');
+            }
+
+            await loadReservations();
+        } catch (error) {
+            console.error('Error saving reservation:', error);
+            toast.error('Errore durante il salvataggio');
+        }
+    };
+
+    // Show loading state
+    if (settingsLoading || isLoadingReservations) {
+        return (
+            <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+                <div className="text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+                    <p className="text-muted-foreground">Caricamento...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">

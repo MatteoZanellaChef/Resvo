@@ -41,10 +41,10 @@ export type TableFormData = z.infer<typeof tableSchema>;
 
 // Restaurant settings validation schema
 export const restaurantSettingsSchema = z.object({
-    name: z.string().min(2, { message: 'Il nome deve contenere almeno 2 caratteri' }),
+    name: z.string().min(2, { message: 'Il nome deve contenere almeno 2 caratteri' }).optional().or(z.literal('')),
     maxCapacityLunch: z.number().min(1, { message: 'La capacità deve essere almeno 1' }),
     maxCapacityDinner: z.number().min(1, { message: 'La capacità deve essere almeno 1' }),
-    defaultTableDuration: z.number().min(30, { message: 'Minimo 30 minuti' }).max(300, { message: 'Massimo 5 ore' }),
+    defaultTableDuration: z.number().min(30, { message: 'Minimo 30 minuti' }).max(300, { message: 'Massimo 5 ore' }).optional(),
 });
 
 export type RestaurantSettingsFormData = z.infer<typeof restaurantSettingsSchema>;

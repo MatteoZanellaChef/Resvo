@@ -8,6 +8,8 @@ import { AppearanceSettings } from '@/components/settings/appearance-settings';
 import { Toaster } from '@/components/ui/sonner';
 import { Store, UtensilsCrossed, Palette } from 'lucide-react';
 
+import { ClientOnly } from '@/components/ui/client-only';
+
 export default function RestaurantSettingsPage() {
     return (
         <div className="space-y-6">
@@ -18,37 +20,39 @@ export default function RestaurantSettingsPage() {
                 </p>
             </div>
 
-            <Tabs defaultValue="general" className="space-y-6">
-                <TabsList className="grid w-full max-w-2xl grid-cols-3">
-                    <TabsTrigger value="general" className="flex items-center gap-2">
-                        <Store className="h-4 w-4" />
-                        <span className="hidden sm:inline">Generale</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="tables" className="flex items-center gap-2">
-                        <UtensilsCrossed className="h-4 w-4" />
-                        <span className="hidden sm:inline">Tavoli</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="appearance" className="flex items-center gap-2">
-                        <Palette className="h-4 w-4" />
-                        <span className="hidden sm:inline">Aspetto</span>
-                    </TabsTrigger>
-                </TabsList>
+            <ClientOnly>
+                <Tabs defaultValue="general" className="space-y-6">
+                    <TabsList className="grid w-full max-w-2xl grid-cols-3">
+                        <TabsTrigger value="general" className="flex items-center gap-2">
+                            <Store className="h-4 w-4" />
+                            <span className="hidden sm:inline">Generale</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="tables" className="flex items-center gap-2">
+                            <UtensilsCrossed className="h-4 w-4" />
+                            <span className="hidden sm:inline">Tavoli</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="appearance" className="flex items-center gap-2">
+                            <Palette className="h-4 w-4" />
+                            <span className="hidden sm:inline">Aspetto</span>
+                        </TabsTrigger>
+                    </TabsList>
 
-                <TabsContent value="general" className="space-y-6">
-                    <RestaurantSettingsForm />
-                </TabsContent>
+                    <TabsContent value="general" className="space-y-6">
+                        <RestaurantSettingsForm />
+                    </TabsContent>
 
 
 
-                <TabsContent value="tables" className="space-y-6">
-                    <SpaceManagement />
-                    <TableManagement />
-                </TabsContent>
+                    <TabsContent value="tables" className="space-y-6">
+                        <SpaceManagement />
+                        <TableManagement />
+                    </TabsContent>
 
-                <TabsContent value="appearance" className="space-y-6">
-                    <AppearanceSettings />
-                </TabsContent>
-            </Tabs>
+                    <TabsContent value="appearance" className="space-y-6">
+                        <AppearanceSettings />
+                    </TabsContent>
+                </Tabs>
+            </ClientOnly>
 
             <Toaster />
         </div>

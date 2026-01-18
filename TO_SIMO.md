@@ -1,68 +1,239 @@
 # TO_SIMO.md - Operazioni Manuali
 
-## 📱 Test Funzionalità
+**Risultato Atteso:**
+- ✅ Toast verde "Logout effettuato"
+- ✅ Redirect a `/login`
+- ✅ Se provi ad andare su `/`, vieni redirectato a login
 
-### 5. Test Calendario (Completato)
-**Stato:** ✅ Funzionante
+#### Test 1.5: Accesso Diretto senza Login
+**Passi:**
+1. Fai logout (o usa finestra incognito)
+2. Prova ad andare direttamente su `http://localhost:3000/`
+3. O su `/settings/restaurant`
 
-- [x] Visualizzazione calendario mensile
-- [x] Toggle Pranzo/Cena
-- [x] Click su giorno per dettagli
-- [x] Navigazione mesi
-- [x] Indicatori capacità colorati
-- [x] ⭐ Click "Nuova Prenotazione" dal dettaglio giorno
-- [x] ✨ UI/UX ottimizzata per desktop e mobile
+**Risultato Atteso:**
+- ✅ Redirect automatico a `/login`
+- ✅ Non vedi contenuti protetti
 
-### 6. Test Navigazione (Completato)
-**Stato:** ✅ Risolto
+---
 
-Le pagine della sidebar ora funzionano tutte:
-- ✅ `/` - Calendario (completo)
-- ✅ `/reservations` - Prenotazioni (✨ COMPLETATO!)
-- ✅ `/statistics` - Statistiche (✨ COMPLETATO!)
-- ✅ `/settings/restaurant` - Impostazioni (✨ COMPLETATO!)
+### ✅ FASE 2: Restaurant Settings (COMPLETATA)
 
-### 8. Test Pagina Prenotazioni (NUOVO - Completato)
-**Stato:** ✅ Funzionante
+**Prerequisito**: Devi essere loggato!
 
-La pagina prenotazioni è ora completamente funzionale:
-- ✅ **Statistiche**: Totali, Oggi, In Arrivo, Da Confermare
-- ✅ **Ricerca**: Per nome cliente, telefono o email
-- ✅ **Filtri**: Servizio (pranzo/cena) e Stato (confermata, pending, etc.)
-- ✅ **Ordinamento**: Per data o per orario
-- ✅ **Form Completo**: Data picker, orari dinamici, assegnazione tavolo
-- ✅ **Gestione CRUD**: Crea, modifica, elimina prenotazioni
-- ✅ **Validazione**: Tutti i campi con Zod
-- ✅ **Card Dettagliate**: Info cliente, note, richieste speciali
-- ✅ **Toast Notifications**: Feedback operazioni
+#### Test 2.1: Caricamento Dati Iniziali
+**Passi:**
+1. Login per la prima volta (o dopo aver svuotato il DB)
+2. Vai su `/settings/restaurant`
+3. Tab "Generale"
 
-**Come testare:**
-1. Vai su http://localhost:3000/reservations
-2. Visualizza statistiche in tempo reale
-3. Cerca prenotazioni per nome/telefono
-4. Usa filtri per servizio e stato
-5. Click "Nuova Prenotazione" per creare
-6. Seleziona data dal calendar picker
-7. Scegli orario dalle slot disponibili
-8. Assegna tavolo (opzionale)
-9. Modifica o elimina prenotazioni esistenti
+**Risultato Atteso:**
+- ✅ Form precompilato con dati default o esistenti
+- ✅ Nome ristorante visibile
+- ✅ Capacità pranzo: 80, Cena: 100
+- ✅ Durata media tavolo: 120 minuti
 
-### 7. Test Impostazioni Ristorante (NUOVO - Completato)
-**Stato:** ✅ Funzionante
+#### Test 2.2: Modifica Settings Generali
+**Passi:**
+1. Tab Generale" in `/settings/restaurant`
+2. Cambia nome ristorante (es: "Il Mio Ristorante")
+3. Cambia capacità pranzo a 60
+4. Cambia capacità cena a 90
+5. Click "Salva Modifiche"
 
-La pagina impostazioni è ora completamente funzionale:
-- ✅ **Tab Generale**: Nome ristorante, capacità pranzo/cena, durata tavolo
-- ✅ **Tab Orari**: Configurazione orari apertura per ogni giorno con toggle chiusura
-- ✅ **Tab Tavoli**: Gestione completa tavoli (aggiungi, modifica, elimina)
-- ✅ **Tab Aspetto**: Tema chiaro/scuro/sistema con anteprima ⭐ NUOVO!
-- ✅ Form validation con Zod
-- ✅ Toast notifications per feedback utente
-- ✅ Dati salvati temporaneamente in state (pronti per Supabase)
+**Risultato Atteso:**
+- ✅ Toast verde "Impostazioni salvate con successo!"
+- ✅ Se ricarichi la pagina (F5), i dati sono ancora lì
+- ✅ Controlla su Supabase Dashboard → Table Editor → `restaurants`
 
-**Come testare:**
-1. Vai su http://localhost:3000/settings/restaurant
-2. Prova a modificare nome, capacità, durata
-3. Configura orari per ogni giorno, prova a chiudere un giorno
-4. Aggiungi/modifica/elimina tavoli
-5. **NUOVO**: Vai nel tab "Aspetto" e cambia il tema (Chiaro/Scuro/Sistema)
-6. Verifica le notifiche toast dopo ogni salvataggio
+#### Test 2.3: Verifica Persistenza su Supabase
+**Passi:**
+1. Dopo aver salvato modifiche al ristorante
+2. Vai su **Supabase Dashboard**
+3. Table Editor → `restaurants`
+4. Verifica il record
+
+**Risultato Atteso:**
+- ✅ C'è 1 record nella tabella `restaurants`
+- ✅ `user_id` corrisponde al tuo user ID
+- ✅ `name` è quello che hai inserito
+- ✅ `max_capacity_lunch` e `max_capacity_dinner` corretti
+
+---
+
+### ✅ FASE 3: Gestione Spazi (COMPLETATA)
+
+**Prerequisito**: Login + vai su `/settings/restaurant` → Tab "Tavoli"
+
+#### Test 3.1: Visualizzazione Spazi Predefiniti
+**Passi:**
+1. Vai al tab "Tavoli"
+2. Cerca la sezione "Gestione Spazi"
+
+**Risultato Atteso:**
+- ✅ Vedi 3 spazi predefiniti:
+  - Interno (badge "Predefinito")
+  - Esterno (badge "Predefinito")
+  - Veranda (badge "Predefinito")
+- ✅ Ogni spazio mostra "X tavoli" (10 totali dal seed)
+
+#### Test 3.2: Creazione Spazio Custom
+**Passi:**
+1. Click "Aggiungi Spazio"
+2. Nome Spazio: "Terrazza"
+3. Valore Identificativo: "terrazza"
+4. Click "Crea Spazio"
+
+**Risultato Atteso:**
+- ✅ Toast verde "Spazio aggiunto!"
+- ✅ Il nuovo spazio appare nella lista
+- ✅ NON ha badge "Predefinito"
+
+#### Test 3.3: Modifica Spazio Custom
+**Passi:**
+1. Click icona "✏️" su "Terrazza"
+2. Cambia nome in "Giardino"
+3. Cambia valore in "giardino"
+4. Click "Aggiorna Spazio"
+
+**Risultato Atteso:**
+- ✅ Toast verde "Spazio aggiornato!"
+- ✅ Nome cambiato visibile immediatamente
+
+#### Test 3.4: Tentativo Modifica Spazio Predefinito
+**Passi:**
+1. Click "✏️" su "Interno" (predefinito)
+2. Prova a cambiare il valore identificativo
+3. Nota che il campo è disabilitato
+
+**Risultato Atteso:**
+- ✅ Puoi cambiare solo il "label" (nome visualizzato)
+- ✅ Il campo "valore" è disabilitato (grigio)
+- ✅ Messaggio: "Il valore degli spazi predefiniti non può essere modificato"
+
+#### Test 3.5: Eliminazione Spazio (senza tavoli)
+**Passi:**
+1. Click "🗑️" su "Terrazza" (custom, senza tavoli)
+2. Conferma eliminazione
+
+**Risultato Atteso:**
+- ✅ Toast verde "Spazio eliminato!"
+- ✅ Spazio rimosso dalla lista
+
+#### Test 3.6: Tentativo Eliminazione Spazio con Tavoli
+**Passi:**
+1. Crea uno spazio "Test"
+2. Crea un tavolo assegnato a "Test"
+3. Click "🗑️" su spazio "Test"
+
+**Risultato Atteso:**
+- ✅ Toast rosso: "Impossibile eliminare lo spazio: ci sono X tavoli"
+- ✅ Spazio NON eliminato
+- ✅ Prima devi spostare/eliminare i tavoli
+
+---
+
+### ✅ FASE 4: Gestione Tavoli (COMPLETATA)
+
+**Prerequisito**: Login + `/settings/restaurant` → Tab "Tavoli"
+
+#### Test 4.1: Visualizzazione Tavoli Iniziali
+**Passi:**
+1. Guarda la sezione "Gestione Tavoli"
+
+**Risultato Atteso:**
+- ✅ Vedi 10 tavoli creati dal seed data
+- ✅ Raggruppati per posizione (Interno, Esterno, Veranda)
+- ✅ Statistiche in alto:
+  - Tavoli Totali: 10
+  - Posti Totali: somma capacità
+  - Tavoli Attivi: 10
+
+#### Test 4.2: Creazione Nuovo Tavolo
+**Passi:**
+1. Click "Aggiungi Tavolo"
+2. Numero Tavolo: "11"
+3. Capacità: 4
+4. Posizione: "Interno"
+5. Click "Crea Tavolo"
+
+**Risultato Atteso:**
+- ✅ Toast verde "Tavolo aggiunto!"
+- ✅ Tavolo 11 appare nella sezione "Interno"
+- ✅ Statistiche aggiornate (Tavoli Totali: 11)
+
+#### Test 4.3: Modifica Tavolo
+**Passi:**
+1. Click "✏️" su tavolo esistente
+2. Cambia capacità da 2 a 4
+3. Cambia posizione da "Interno" a "Esterno"
+4. Click "Aggiorna Tavolo"
+
+**Risultato Atteso:**
+- ✅ Toast verde "Tavolo aggiornato!"
+- ✅ Tavolo spostato nella sezione corretta
+- ✅ Capacità visibile aggiornata
+
+#### Test 4.4: Eliminazione Tavolo
+**Passi:**
+1. Click "🗑️" su un tavolo
+2. Conferma
+
+**Risultato Atteso:**
+- ✅ Toast verde "Tavolo eliminato"
+- ✅ Tavolo rimosso dalla lista
+- ✅ Statistiche aggiornate
+
+---
+
+### ⏳ FASE 5: Prenotazioni (IN SVILUPPO)
+
+_Test disponibili dopo implementazione..._
+
+---
+
+### ⏳ FASE 6: Statistiche (IN SVILUPPO)
+
+_Test disponibili dopo implementazione..._
+
+---
+
+## 🐛 Cosa fare se trovi problemi
+
+### Problema: "Cannot read properties of null"
+**Causa**: Dati non ancora caricati
+**Soluzione**: 
+- Ricarica la pagina
+- Verifica di essere loggato
+- Controlla console per errori di rete
+
+### Problema: "Failed to fetch" o errori Supabase
+**Causa**: Configurazione errata
+**Controlla**:
+1. File `.env.local` ha URL e anon key corretti
+2. Supabase project è attivo
+3. RLS policies sono attive
+
+### Problema: Dati non si salvano
+**Controlla**:
+1. Console browser per errori
+2. Network tab per vedere chiamate API
+3. Supabase Dashboard → Logs per errori server
+
+### Problema: Redirect loop login
+**Causa**: Cookie/session problemi
+**Soluzione**:
+- Cancella cookies del browser
+- Logout e login di nuovo
+- Prova finestra incognito
+
+---
+
+## 📝 PROSSIMI STEP (da implementare)
+
+1. ✅ Database schema completato
+2. ✅ Autenticazione implementata
+3. ✅ Restaurant Settings migrato a Supabase
+4. ⏳ Implementare Reservations Service (IN CORSO)
+5. ⏳ Migrare Calendario e Lista Prenotazioni
+6. ⏳ Implementare Statistics Service

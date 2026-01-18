@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
@@ -17,17 +17,6 @@ export const metadata: Metadata = {
   title: "Resvo - Gestione Prenotazioni Ristorante",
   description: "Sistema professionale per la gestione delle prenotazioni del tuo ristorante",
   manifest: "/manifest.json",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#1a1a2e" }
-  ],
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-    viewportFit: "cover"
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -44,6 +33,19 @@ export const metadata: Metadata = {
   }
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1a2e" }
+  ]
+};
+
+
 
 export default function RootLayout({
   children,
@@ -51,21 +53,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="it" suppressHydrationWarning>
+    <html lang="it" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js').then(
-                    (registration) => {
-                      console.log('SW registered:', registration);
-                    },
-                    (error) => {
-                      console.log('SW registration failed:', error);
-                    }
-                  );
+                  navigator.serviceWorker.register('/sw.js').catch(() => {});
                 });
               }
             `,

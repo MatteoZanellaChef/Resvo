@@ -77,7 +77,7 @@ export function ReservationFormDialog({
             ...data,
             date: selectedDate!,
             serviceType: selectedService,
-            id: reservation?.id || `res-${Date.now()}`,
+            id: reservation?.id,
             restaurantId: 'restaurant-1',
             createdAt: reservation?.createdAt || new Date(),
             updatedAt: new Date(),

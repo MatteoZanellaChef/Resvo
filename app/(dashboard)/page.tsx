@@ -1,35 +1,68 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ServiceType, Reservation } from '@/types';
 import { CalendarView } from '@/components/calendar/calendar-view';
 import { WeekView } from '@/components/calendar/week-view';
 import { DayView } from '@/components/calendar/day-view';
 import { ServiceToggle } from '@/components/calendar/service-toggle';
 import { ReservationFormDialog } from '@/components/reservations/reservation-form-dialog';
-import { mockReservations } from '@/lib/mock-data';
 import { useRestaurantSettings } from '@/lib/contexts/restaurant-settings-context';
+import { reservationsService } from '@/lib/supabase/services/reservations.service';
 import { Toaster } from '@/components/ui/sonner';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Calendar as CalendarIcon, CalendarDays } from 'lucide-react';
+import { Calendar as CalendarIcon, CalendarDays, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 type ViewType = 'month' | 'week' | 'day';
 
 export default function HomePage() {
-    const [reservations, setReservations] = useState<Reservation[]>(mockReservations);
+    const { restaurant, isLoading: settingsLoading } = useRestaurantSettings();
+    const [reservations, setReservations] = useState<Reservation[]>([]);
     const [selectedService, setSelectedService] = useState<ServiceType>('dinner');
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [reservationFormOpen, setReservationFormOpen] = useState(false);
     const [prefilledDate, setPrefilledDate] = useState<Date | null>(null);
     const [prefilledService, setPrefilledService] = useState<ServiceType>('dinner');
     const [viewType, setViewType] = useState<ViewType>('month');
+    const [isLoadingReservations, setIsLoadingReservations] = useState(true);
 
-    const { restaurant } = useRestaurantSettings();
+    // Load reservations for the current month
+    useEffect(() => {
+        if (restaurant && restaurant.id) {
+            loadReservations();
+        }
+    }, [restaurant]);
+
+    const loadReservations = async () => {
+        if (!restaurant) return;
+
+        try {
+            setIsLoadingReservations(true);
+
+            // Get reservations for +/- 2 months to cover all calendar views
+            const today = new Date();
+            const startDate = new Date(today.getFullYear(), today.getMonth() - 2, 1);
+            const endDate = new Date(today.getFullYear(), today.getMonth() + 3, 0);
+
+            const data = await reservationsService.getReservationsForPeriod(
+                restaurant.id,
+                startDate,
+                endDate
+            );
+
+            setReservations(data);
+        } catch (error) {
+            console.error('Error loading reservations:', error);
+            toast.error('Errore durante il caricamento delle prenotazioni');
+        } finally {
+            setIsLoadingReservations(false);
+        }
+    };
 
     const maxCapacity = selectedService === 'lunch'
-        ? restaurant.maxCapacityLunch
-        : restaurant.maxCapacityDinner;
+        ? restaurant?.maxCapacityLunch || 80
+        : restaurant?.maxCapacityDinner || 100;
 
     const handleDayClick = (date: Date) => {
         setSelectedDate(date);
@@ -42,9 +75,39 @@ export default function HomePage() {
         setReservationFormOpen(true);
     };
 
-    const handleSaveReservation = (data: Partial<Reservation>) => {
-        setReservations((prev) => [...prev, data as Reservation]);
+    const handleSaveReservation = async (data: Partial<Reservation>) => {
+        if (!restaurant) return;
+
+        try {
+            if (data.id) {
+                // Update existing reservation  
+                await reservationsService.updateReservation(data.id, data);
+                toast.success('Prenotazione aggiornata');
+            } else {
+                // Create new reservation
+                await reservationsService.createReservation(restaurant.id, data as any);
+                toast.success('Prenotazione creata');
+            }
+
+            // Reload reservations
+            await loadReservations();
+        } catch (error) {
+            console.error('Error saving reservation:', error);
+            toast.error('Errore durante il salvataggio');
+        }
     };
+
+    // Show loading state
+    if (settingsLoading || isLoadingReservations) {
+        return (
+            <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+                <div className="text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+                    <p className="text-muted-foreground">Caricamento...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-4 sm:space-y-6">

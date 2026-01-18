@@ -23,10 +23,8 @@ export function RestaurantSettingsForm() {
     } = useForm<RestaurantSettingsFormData>({
         resolver: zodResolver(restaurantSettingsSchema),
         defaultValues: {
-            name: restaurant.name,
-            maxCapacityLunch: restaurant.maxCapacityLunch,
-            maxCapacityDinner: restaurant.maxCapacityDinner,
-            defaultTableDuration: restaurant.defaultTableDuration,
+            maxCapacityLunch: restaurant?.maxCapacityLunch || 80,
+            maxCapacityDinner: restaurant?.maxCapacityDinner || 100,
         },
     });
 
@@ -48,25 +46,12 @@ export function RestaurantSettingsForm() {
         <form onSubmit={handleSubmit(onSubmit)}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Informazioni Ristorante</CardTitle>
+                    <CardTitle>Configurazione Sala</CardTitle>
                     <CardDescription>
-                        Configura nome, capacità e durata media dei tavoli
+                        Imposta la capacità massima per servizio
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {/* Restaurant Name */}
-                    <div className="space-y-2">
-                        <Label htmlFor="name">Nome Ristorante</Label>
-                        <Input
-                            id="name"
-                            {...register('name')}
-                            placeholder="Il mio ristorante"
-                        />
-                        {errors.name && (
-                            <p className="text-sm text-destructive">{errors.name.message}</p>
-                        )}
-                    </div>
-
                     {/* Capacities */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -100,23 +85,6 @@ export function RestaurantSettingsForm() {
                                 Numero massimo di coperti a cena
                             </p>
                         </div>
-                    </div>
-
-                    {/* Table Duration */}
-                    <div className="space-y-2">
-                        <Label htmlFor="defaultTableDuration">Durata Media Tavolo (minuti)</Label>
-                        <Input
-                            id="defaultTableDuration"
-                            type="number"
-                            {...register('defaultTableDuration', { valueAsNumber: true })}
-                            placeholder="120"
-                        />
-                        {errors.defaultTableDuration && (
-                            <p className="text-sm text-destructive">{errors.defaultTableDuration.message}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                            Tempo medio che un cliente trascorre al tavolo
-                        </p>
                     </div>
 
                     {/* Save Button */}

@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { mockRestaurant } from '@/lib/mock-data';
+import { useState, useEffect } from 'react';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -10,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Save } from 'lucide-react';
+import { useRestaurantSettings } from '@/lib/contexts/restaurant-settings-context';
 
 type OpeningHours = {
     [key: string]: {
@@ -20,117 +20,154 @@ type OpeningHours = {
 };
 
 export function OpeningHoursConfig() {
-    const [hours, setHours] = useState<OpeningHours>(mockRestaurant.openingHours);
+    const { restaurant, updateSettings, isLoading } = useRestaurantSettings();
+    const [hours, setHours] = useState<OpeningHours>({});
     const [isSaving, setIsSaving] = useState(false);
 
-    const handleToggleClosed = (day: string) => {
-        setHours(prev => ({
-            ...prev,
-            [day]: {
-                ...prev[day],
-                closed: !prev[day]?.closed,
-            },
-        }));
-    };
+    useEffect(() => {
+        if (restaurant && restaurant.openingHours) {
+            setHours(restaurant.openingHours as OpeningHours);
+        }
+    }, [restaurant]);
 
-    const handleTimeChange = (
-        day: string,
-        service: 'lunch' | 'dinner',
-        type: 'start' | 'end',
-        value: string
-    ) => {
-        setHours(prev => ({
+    const handleTimeChange = (day: string, service: 'lunch' | 'dinner', type: 'start' | 'end', value: string) => {
+        setHours((prev) => ({
             ...prev,
             [day]: {
                 ...prev[day],
                 [service]: {
                     ...prev[day]?.[service],
                     [type]: value,
-                } as { start: string; end: string },
+                },
+            },
+        }));
+    };
+
+    const handleClosedToggle = (day: string, closed: boolean) => {
+        setHours((prev) => ({
+            ...prev,
+            [day]: {
+                ...prev[day],
+                closed,
             },
         }));
     };
 
     const handleSave = async () => {
-        setIsSaving(true);
-
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        console.log('Opening hours saved:', hours);
-        toast.success('Orari di apertura salvati!');
-        setIsSaving(false);
+        try {
+            setIsSaving(true);
+            await updateSettings({ openingHours: hours });
+            toast.success('Orari salvati con successo!');
+        } catch (error) {
+            console.error('Error saving hours:', error);
+            toast.error('Errore durante il salvataggio');
+        } finally {
+            setIsSaving(false);
+        }
     };
+
+    if (isLoading || !restaurant) {
+        return null;
+    }
 
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Orari di Apertura</CardTitle>
                 <CardDescription>
-                    Configura gli orari di pranzo e cena per ogni giorno della settimana
+                    Configura gli orari di apertura per pranzo e cena per ogni giorno della settimana
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
                 {DAYS_OF_WEEK.map((day) => {
                     const dayHours = hours[day] || {};
                     const isClosed = dayHours.closed || false;
 
                     return (
-                        <div key={day} className="space-y-3 pb-4 border-b last:border-0">
-                            {/* Day header with closed toggle */}
+                        <div key={day} className="space-y-4 pb-6 border-b last:border-0 last:pb-0">
                             <div className="flex items-center justify-between">
                                 <Label className="text-base font-semibold">{day}</Label>
                                 <div className="flex items-center gap-2">
-                                    <Label htmlFor={`closed-${day}`} className="text-sm text-muted-foreground">
+                                    <Label htmlFor={`${day}-closed`} className="text-sm text-muted-foreground">
                                         Chiuso
                                     </Label>
                                     <Switch
-                                        id={`closed-${day}`}
+                                        id={`${day}-closed`}
                                         checked={isClosed}
-                                        onCheckedChange={() => handleToggleClosed(day)}
+                                        onCheckedChange={(checked) => handleClosedToggle(day, checked)}
                                     />
                                 </div>
                             </div>
 
                             {!isClosed && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4">
-                                    {/* Lunch hours */}
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    {/* Lunch Hours */}
                                     <div className="space-y-2">
-                                        <Label className="text-sm text-muted-foreground">Pranzo</Label>
+                                        <Label className="text-sm font-medium">Pranzo</Label>
                                         <div className="flex items-center gap-2">
-                                            <Input
-                                                type="time"
-                                                value={dayHours.lunch?.start || '12:00'}
-                                                onChange={(e) => handleTimeChange(day, 'lunch', 'start', e.target.value)}
-                                                className="flex-1"
-                                            />
-                                            <span className="text-muted-foreground">-</span>
-                                            <Input
-                                                type="time"
-                                                value={dayHours.lunch?.end || '15:00'}
-                                                onChange={(e) => handleTimeChange(day, 'lunch', 'end', e.target.value)}
-                                                className="flex-1"
-                                            />
+                                            <div className="flex-1">
+                                                <Label htmlFor={`${day}-lunch-start`} className="text-xs text-muted-foreground">
+                                                    Apertura
+                                                </Label>
+                                                <Input
+                                                    id={`${day}-lunch-start`}
+                                                    type="time"
+                                                    value={dayHours.lunch?.start || ''}
+                                                    onChange={(e) =>
+                                                        handleTimeChange(day, 'lunch', 'start', e.target.value)
+                                                    }
+                                                    className="mt-1"
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <Label htmlFor={`${day}-lunch-end`} className="text-xs text-muted-foreground">
+                                                    Chiusura
+                                                </Label>
+                                                <Input
+                                                    id={`${day}-lunch-end`}
+                                                    type="time"
+                                                    value={dayHours.lunch?.end || ''}
+                                                    onChange={(e) =>
+                                                        handleTimeChange(day, 'lunch', 'end', e.target.value)
+                                                    }
+                                                    className="mt-1"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Dinner hours */}
+                                    {/* Dinner Hours */}
                                     <div className="space-y-2">
-                                        <Label className="text-sm text-muted-foreground">Cena</Label>
+                                        <Label className="text-sm font-medium">Cena</Label>
                                         <div className="flex items-center gap-2">
-                                            <Input
-                                                type="time"
-                                                value={dayHours.dinner?.start || '19:00'}
-                                                onChange={(e) => handleTimeChange(day, 'dinner', 'start', e.target.value)}
-                                                className="flex-1"
-                                            />
-                                            <span className="text-muted-foreground">-</span>
-                                            <Input
-                                                type="time"
-                                                value={dayHours.dinner?.end || '23:00'}
-                                                onChange={(e) => handleTimeChange(day, 'dinner', 'end', e.target.value)}
-                                                className="flex-1"
-                                            />
+                                            <div className="flex-1">
+                                                <Label htmlFor={`${day}-dinner-start`} className="text-xs text-muted-foreground">
+                                                    Apertura
+                                                </Label>
+                                                <Input
+                                                    id={`${day}-dinner-start`}
+                                                    type="time"
+                                                    value={dayHours.dinner?.start || ''}
+                                                    onChange={(e) =>
+                                                        handleTimeChange(day, 'dinner', 'start', e.target.value)
+                                                    }
+                                                    className="mt-1"
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <Label htmlFor={`${day}-dinner-end`} className="text-xs text-muted-foreground">
+                                                    Chiusura
+                                                </Label>
+                                                <Input
+                                                    id={`${day}-dinner-end`}
+                                                    type="time"
+                                                    value={dayHours.dinner?.end || ''}
+                                                    onChange={(e) =>
+                                                        handleTimeChange(day, 'dinner', 'end', e.target.value)
+                                                    }
+                                                    className="mt-1"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -139,10 +176,9 @@ export function OpeningHoursConfig() {
                     );
                 })}
 
-                {/* Save Button */}
                 <div className="flex justify-end pt-4">
-                    <Button onClick={handleSave} disabled={isSaving}>
-                        <Save className="mr-2 h-4 w-4" />
+                    <Button onClick={handleSave} disabled={isSaving || isLoading} className="gap-2">
+                        <Save className="h-4 w-4" />
                         {isSaving ? 'Salvataggio...' : 'Salva Orari'}
                     </Button>
                 </div>

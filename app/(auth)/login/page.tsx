@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Toaster } from '@/components/ui/sonner';
 import { UtensilsCrossed } from 'lucide-react';
 
 export default function LoginPage() {
@@ -17,11 +18,28 @@ export default function LoginPage() {
         e.preventDefault();
         setIsLoading(true);
 
-        // Simulate login - in real implementation this would check Supabase auth
-        setTimeout(() => {
-            router.push('/');
+        // Real Supabase authentication
+        const { signIn } = await import('@/lib/supabase/auth');
+        const { user, error } = await signIn(email, password);
+
+        if (error) {
+            // Show error toast
+            const { toast } = await import('sonner');
+            toast.error('Errore di accesso', {
+                description: error.message,
+            });
             setIsLoading(false);
-        }, 1000);
+            return;
+        }
+
+        if (user) {
+            // Success - refresh router to ensure middleware picks up the new cookie
+            router.refresh();
+            // Redirect to dashboard
+            router.push('/');
+        }
+
+        setIsLoading(false);
     };
 
     return (
@@ -87,6 +105,7 @@ export default function LoginPage() {
                     </p>
                 </CardContent>
             </Card>
+            <Toaster />
         </div>
     );
 }
