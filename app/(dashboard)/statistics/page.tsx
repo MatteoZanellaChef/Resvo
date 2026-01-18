@@ -337,6 +337,16 @@ export default function StatisticsPage() {
                                 <CardContent>
                                     <ResponsiveContainer width="100%" height={350}>
                                         <BarChart data={weekdayData}>
+                                            <defs>
+                                                <linearGradient id="colorPranzoWeek" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor={COLORS.lunch} stopOpacity={0.8} />
+                                                    <stop offset="95%" stopColor={COLORS.lunch} stopOpacity={0.1} />
+                                                </linearGradient>
+                                                <linearGradient id="colorCenaWeek" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor={COLORS.dinner} stopOpacity={0.8} />
+                                                    <stop offset="95%" stopColor={COLORS.dinner} stopOpacity={0.1} />
+                                                </linearGradient>
+                                            </defs>
                                             <XAxis
                                                 dataKey="day"
                                                 stroke="#64748b"
@@ -354,13 +364,13 @@ export default function StatisticsPage() {
                                             <Bar
                                                 dataKey="pranzo"
                                                 name="Pranzo"
-                                                fill={COLORS.lunch}
+                                                fill="url(#colorPranzoWeek)"
                                                 radius={[8, 8, 0, 0]}
                                             />
                                             <Bar
                                                 dataKey="cena"
                                                 name="Cena"
-                                                fill={COLORS.dinner}
+                                                fill="url(#colorCenaWeek)"
                                                 radius={[8, 8, 0, 0]}
                                             />
                                         </BarChart>
@@ -378,8 +388,17 @@ export default function StatisticsPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <ResponsiveContainer width="100%" height={350}>
-                                        <LineChart data={dailyData}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                                        <AreaChart data={dailyData}>
+                                            <defs>
+                                                <linearGradient id="colorPranzoGuests" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor={COLORS.lunch} stopOpacity={0.8} />
+                                                    <stop offset="95%" stopColor={COLORS.lunch} stopOpacity={0.1} />
+                                                </linearGradient>
+                                                <linearGradient id="colorCenaGuests" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor={COLORS.dinner} stopOpacity={0.8} />
+                                                    <stop offset="95%" stopColor={COLORS.dinner} stopOpacity={0.1} />
+                                                </linearGradient>
+                                            </defs>
                                             <XAxis
                                                 dataKey="date"
                                                 stroke="#64748b"
@@ -394,25 +413,25 @@ export default function StatisticsPage() {
                                                 wrapperStyle={{ paddingTop: '20px' }}
                                                 iconType="circle"
                                             />
-                                            <Line
+                                            <Area
                                                 type="monotone"
                                                 dataKey="copertiPranzo"
                                                 name="Coperti Pranzo"
                                                 stroke={COLORS.lunch}
-                                                strokeWidth={3}
-                                                dot={{ fill: COLORS.lunch, r: 4 }}
-                                                activeDot={{ r: 6 }}
+                                                strokeWidth={2}
+                                                fillOpacity={1}
+                                                fill="url(#colorPranzoGuests)"
                                             />
-                                            <Line
+                                            <Area
                                                 type="monotone"
                                                 dataKey="copertiCena"
                                                 name="Coperti Cena"
                                                 stroke={COLORS.dinner}
-                                                strokeWidth={3}
-                                                dot={{ fill: COLORS.dinner, r: 4 }}
-                                                activeDot={{ r: 6 }}
+                                                strokeWidth={2}
+                                                fillOpacity={1}
+                                                fill="url(#colorCenaGuests)"
                                             />
-                                        </LineChart>
+                                        </AreaChart>
                                     </ResponsiveContainer>
                                 </CardContent>
                             </Card>
@@ -426,6 +445,12 @@ export default function StatisticsPage() {
                                 <CardContent>
                                     <ResponsiveContainer width="100%" height={350}>
                                         <BarChart data={topDays} layout="vertical">
+                                            <defs>
+                                                <linearGradient id="colorPrenotazioni" x1="0" y1="0" x2="1" y2="0">
+                                                    <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8} />
+                                                    <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0.3} />
+                                                </linearGradient>
+                                            </defs>
                                             <XAxis type="number" stroke="#64748b" style={{ fontSize: '12px' }} />
                                             <YAxis
                                                 dataKey="date"
@@ -438,7 +463,7 @@ export default function StatisticsPage() {
                                             <Bar
                                                 dataKey="count"
                                                 name="Prenotazioni"
-                                                fill={COLORS.primary}
+                                                fill="url(#colorPrenotazioni)"
                                                 radius={[0, 8, 8, 0]}
                                             />
                                         </BarChart>
@@ -459,7 +484,7 @@ export default function StatisticsPage() {
                                         <ResponsiveContainer width="100%" height={300}>
                                             <PieChart>
                                                 <Pie
-                                                    data={serviceDistribution}
+                                                    data={serviceDistribution.filter(d => d.value > 0)}
                                                     cx="50%"
                                                     cy="50%"
                                                     labelLine={false}
@@ -470,7 +495,7 @@ export default function StatisticsPage() {
                                                     strokeWidth={2}
                                                     stroke="#fff"
                                                 >
-                                                    {serviceDistribution.map((entry, index) => (
+                                                    {serviceDistribution.filter(d => d.value > 0).map((entry, index) => (
                                                         <Cell key={`cell-${index}`} fill={entry.color} />
                                                     ))}
                                                 </Pie>
@@ -502,7 +527,7 @@ export default function StatisticsPage() {
                                         <ResponsiveContainer width="100%" height={300}>
                                             <PieChart>
                                                 <Pie
-                                                    data={statusDistribution}
+                                                    data={statusDistribution.filter(d => d.value > 0)}
                                                     cx="50%"
                                                     cy="50%"
                                                     labelLine={false}
@@ -513,7 +538,7 @@ export default function StatisticsPage() {
                                                     strokeWidth={2}
                                                     stroke="#fff"
                                                 >
-                                                    {statusDistribution.map((entry, index) => (
+                                                    {statusDistribution.filter(d => d.value > 0).map((entry, index) => (
                                                         <Cell key={`cell-${index}`} fill={entry.color} />
                                                     ))}
                                                 </Pie>
