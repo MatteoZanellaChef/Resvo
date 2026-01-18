@@ -14,6 +14,9 @@ interface DayCellProps {
     maxCapacity: number;
     selectedDate: Date | null;
     onClick: () => void;
+    greenThreshold?: number;
+    yellowThreshold?: number;
+    orangeThreshold?: number;
 }
 
 export function DayCell({
@@ -24,6 +27,9 @@ export function DayCell({
     maxCapacity,
     selectedDate,
     onClick,
+    greenThreshold = 60,
+    yellowThreshold = 80,
+    orangeThreshold = 99,
 }: DayCellProps) {
     const dayReservations = getReservationsForDateAndService(
         reservations,
@@ -34,15 +40,23 @@ export function DayCell({
     const totalGuests = dayReservations.reduce((sum, r) => sum + r.numGuests, 0);
     const percentage = maxCapacity > 0 ? (totalGuests / maxCapacity) * 100 : 0;
 
-    // Determine capacity color
+    // Determine capacity color using dynamic thresholds
     let capacityColor = 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800';
     let dotColor = 'bg-green-500';
-    if (percentage >= 90) {
+    let barColor = 'bg-green-500';
+
+    if (percentage > orangeThreshold) {
         capacityColor = 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800';
         dotColor = 'bg-red-500';
-    } else if (percentage >= 70) {
+        barColor = 'bg-red-500';
+    } else if (percentage >= yellowThreshold) {
+        capacityColor = 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800';
+        dotColor = 'bg-orange-500';
+        barColor = 'bg-orange-500';
+    } else if (percentage >= greenThreshold) {
         capacityColor = 'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800';
         dotColor = 'bg-yellow-500';
+        barColor = 'bg-yellow-500';
     }
 
     const isToday = checkIsToday(date);
@@ -104,7 +118,7 @@ export function DayCell({
                             <div
                                 className={cn(
                                     'h-full transition-all duration-300',
-                                    percentage >= 90 ? 'bg-red-500' : percentage >= 70 ? 'bg-yellow-500' : 'bg-green-500'
+                                    barColor
                                 )}
                                 style={{ width: `${Math.min(percentage, 100)}%` }}
                             />

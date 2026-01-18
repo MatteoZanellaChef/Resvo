@@ -35,10 +35,10 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
             <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border lg:hidden transform transition-transform duration-300 ease-in-out">
                 {/* Header */}
                 <div className="flex items-center justify-between h-16 px-6 border-b border-border">
-                    <div className="flex items-center gap-2">
+                    <Link href="/" onClick={onClose} className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
                         <UtensilsCrossed className="h-8 w-8 text-primary" />
                         <span className="text-xl font-bold text-foreground">Resvo</span>
-                    </div>
+                    </Link>
                     <Button variant="ghost" size="icon" onClick={onClose}>
                         <X className="h-5 w-5" />
                         <span className="sr-only">Chiudi menu</span>

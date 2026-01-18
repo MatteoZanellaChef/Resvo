@@ -12,10 +12,11 @@ export const RESERVATION_STATUS = {
     COMPLETED: 'completed' as const,
 };
 
-export const CAPACITY_THRESHOLDS = {
-    GREEN: 70, // Below 70% is green
-    YELLOW: 90, // 70-90% is yellow
-    RED: 100, // Above 90% is red
+export const DEFAULT_CAPACITY_THRESHOLDS = {
+    GREEN: 60,   // Below 60% is green
+    YELLOW: 80,  // 60-80% is yellow
+    ORANGE: 99,  // 80-99% is orange
+    // Above 99% is red
 };
 
 export const DEFAULT_TIME_SLOTS = {

@@ -10,6 +10,9 @@ export interface Restaurant {
     maxCapacityLunch: number;
     maxCapacityDinner: number;
     defaultTableDuration: number; // in minutes
+    greenThreshold?: number;  // Default 60
+    yellowThreshold?: number; // Default 80
+    orangeThreshold?: number; // Default 99
     openingHours: {
         [key: string]: {
             lunch?: { start: string; end: string };
@@ -77,5 +80,5 @@ export interface CapacityStatus {
     available: number;
     total: number;
     percentage: number;
-    color: 'green' | 'yellow' | 'red';
+    color: 'green' | 'yellow' | 'orange' | 'red';
 }

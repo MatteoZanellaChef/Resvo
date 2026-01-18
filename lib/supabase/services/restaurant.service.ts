@@ -42,6 +42,9 @@ export class RestaurantService {
                 max_capacity_lunch: 80,
                 max_capacity_dinner: 100,
                 default_table_duration: 120,
+                green_threshold: 60,
+                yellow_threshold: 80,
+                orange_threshold: 99,
                 opening_hours: {
                     'Lunedì': { lunch: { start: '12:00', end: '15:00' }, dinner: { start: '19:00', end: '23:00' } },
                     'Martedì': { lunch: { start: '12:00', end: '15:00' }, dinner: { start: '19:00', end: '23:00' } },
@@ -74,6 +77,9 @@ export class RestaurantService {
         if (updates.maxCapacityDinner !== undefined) updateData.max_capacity_dinner = updates.maxCapacityDinner;
         if (updates.defaultTableDuration !== undefined) updateData.default_table_duration = updates.defaultTableDuration;
         if (updates.openingHours !== undefined) updateData.opening_hours = updates.openingHours;
+        if (updates.greenThreshold !== undefined) updateData.green_threshold = updates.greenThreshold;
+        if (updates.yellowThreshold !== undefined) updateData.yellow_threshold = updates.yellowThreshold;
+        if (updates.orangeThreshold !== undefined) updateData.orange_threshold = updates.orangeThreshold;
 
         const { data, error } = await supabase
             .from('restaurants')
@@ -104,6 +110,9 @@ export class RestaurantService {
             maxCapacityLunch: data.max_capacity_lunch,
             maxCapacityDinner: data.max_capacity_dinner,
             defaultTableDuration: data.default_table_duration,
+            greenThreshold: data.green_threshold ?? 60,
+            yellowThreshold: data.yellow_threshold ?? 80,
+            orangeThreshold: data.orange_threshold ?? 99,
             openingHours: data.opening_hours,
             createdAt: new Date(data.created_at),
         };

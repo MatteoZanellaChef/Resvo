@@ -66,6 +66,11 @@ export default function HomePage() {
         ? restaurant?.maxCapacityLunch || 80
         : restaurant?.maxCapacityDinner || 100;
 
+    // Get color thresholds from restaurant settings
+    const greenThreshold = restaurant?.greenThreshold ?? 60;
+    const yellowThreshold = restaurant?.yellowThreshold ?? 80;
+    const orangeThreshold = restaurant?.orangeThreshold ?? 99;
+
     const handleDayClick = (date: Date) => {
         setViewDate(date);
         setViewType('day'); // Switch to day view instead of opening modal
@@ -178,6 +183,9 @@ export default function HomePage() {
                         selectedService={selectedService}
                         maxCapacity={maxCapacity}
                         onDayClick={handleDayClick}
+                        greenThreshold={greenThreshold}
+                        yellowThreshold={yellowThreshold}
+                        orangeThreshold={orangeThreshold}
                     />
                 ) : viewType === 'week' ? (
                     <WeekView
@@ -185,6 +193,9 @@ export default function HomePage() {
                         selectedService={selectedService}
                         maxCapacity={maxCapacity}
                         onDayClick={handleDayClick}
+                        greenThreshold={greenThreshold}
+                        yellowThreshold={yellowThreshold}
+                        orangeThreshold={orangeThreshold}
                     />
                 ) : (
                     <DayView
@@ -194,6 +205,9 @@ export default function HomePage() {
                         onAddReservation={handleAddReservation}
                         date={viewDate}
                         onDateChange={setViewDate}
+                        greenThreshold={greenThreshold}
+                        yellowThreshold={yellowThreshold}
+                        orangeThreshold={orangeThreshold}
                     />
 
                 )}

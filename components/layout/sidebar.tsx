@@ -18,10 +18,10 @@ export function Sidebar() {
     return (
         <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-card border-r border-border">
             {/* Logo */}
-            <div className="flex items-center gap-2 h-16 px-6 border-b border-border">
+            <Link href="/" className="flex items-center gap-2 h-16 px-6 border-b border-border hover:bg-accent/50 transition-colors cursor-pointer">
                 <UtensilsCrossed className="h-8 w-8 text-primary" />
                 <span className="text-xl font-bold text-foreground">Resvo</span>
-            </div>
+            </Link>
 
             {/* Navigation */}
             <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-thin">

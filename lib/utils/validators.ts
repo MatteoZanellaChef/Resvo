@@ -45,6 +45,28 @@ export const restaurantSettingsSchema = z.object({
     maxCapacityLunch: z.number().min(1, { message: 'La capacità deve essere almeno 1' }),
     maxCapacityDinner: z.number().min(1, { message: 'La capacità deve essere almeno 1' }),
     defaultTableDuration: z.number().min(30, { message: 'Minimo 30 minuti' }).max(300, { message: 'Massimo 5 ore' }).optional(),
+    greenThreshold: z.number().min(0, { message: 'Minimo 0%' }).max(100, { message: 'Massimo 100%' }).optional(),
+    yellowThreshold: z.number().min(0, { message: 'Minimo 0%' }).max(100, { message: 'Massimo 100%' }).optional(),
+    orangeThreshold: z.number().min(0, { message: 'Minimo 0%' }).max(100, { message: 'Massimo 100%' }).optional(),
+}).refine((data) => {
+    // Ensure thresholds are in correct order if all are provided
+    if (data.greenThreshold !== undefined && data.yellowThreshold !== undefined) {
+        return data.greenThreshold < data.yellowThreshold;
+    }
+    return true;
+}, {
+    message: 'La soglia gialla deve essere maggiore della soglia verde',
+    path: ['yellowThreshold'],
+}).refine((data) => {
+    // Ensure yellow < orange
+    if (data.yellowThreshold !== undefined && data.orangeThreshold !== undefined) {
+        return data.yellowThreshold < data.orangeThreshold;
+    }
+    return true;
+}, {
+    message: 'La soglia arancione deve essere maggiore della soglia gialla',
+    path: ['orangeThreshold'],
 });
 
 export type RestaurantSettingsFormData = z.infer<typeof restaurantSettingsSchema>;
+

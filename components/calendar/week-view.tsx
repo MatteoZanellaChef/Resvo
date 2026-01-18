@@ -15,6 +15,9 @@ interface WeekViewProps {
     selectedService: ServiceType;
     maxCapacity: number;
     onDayClick: (date: Date) => void;
+    greenThreshold?: number;
+    yellowThreshold?: number;
+    orangeThreshold?: number;
 }
 
 export function WeekView({
@@ -22,6 +25,9 @@ export function WeekView({
     selectedService,
     maxCapacity,
     onDayClick,
+    greenThreshold = 60,
+    yellowThreshold = 80,
+    orangeThreshold = 99,
 }: WeekViewProps) {
     const [currentDate, setCurrentDate] = useState(new Date());
     const weekRef = useRef<HTMLDivElement>(null);
@@ -65,7 +71,11 @@ export function WeekView({
     const getDayData = (day: Date) => {
         const dayReservations = getReservationsForDateAndService(reservations, day, selectedService);
         const totalGuests = dayReservations.reduce((sum, r) => sum + r.numGuests, 0);
-        const status = getCapacityStatus(totalGuests, maxCapacity);
+        const status = getCapacityStatus(totalGuests, maxCapacity, {
+            green: greenThreshold,
+            yellow: yellowThreshold,
+            orange: orangeThreshold,
+        });
 
         return {
             reservations: dayReservations.length,
@@ -80,6 +90,8 @@ export function WeekView({
                 return 'bg-green-100 dark:bg-green-950 border-green-300 dark:border-green-700';
             case 'yellow':
                 return 'bg-yellow-100 dark:bg-yellow-950 border-yellow-300 dark:border-yellow-700';
+            case 'orange':
+                return 'bg-orange-100 dark:bg-orange-950 border-orange-300 dark:border-orange-700';
             case 'red':
                 return 'bg-red-100 dark:bg-red-950 border-red-300 dark:border-red-700';
             default:
@@ -93,6 +105,8 @@ export function WeekView({
                 return 'bg-green-500';
             case 'yellow':
                 return 'bg-yellow-500';
+            case 'orange':
+                return 'bg-orange-500';
             case 'red':
                 return 'bg-red-500';
             default:
@@ -185,7 +199,8 @@ export function WeekView({
                                         <div
                                             className={`h-full transition-all ${dayData.status.color === 'green' ? 'bg-green-500' :
                                                 dayData.status.color === 'yellow' ? 'bg-yellow-500' :
-                                                    'bg-red-500'
+                                                    dayData.status.color === 'orange' ? 'bg-orange-500' :
+                                                        'bg-red-500'
                                                 }`}
                                             style={{ width: `${dayData.status.percentage}%` }}
                                         />

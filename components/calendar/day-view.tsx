@@ -18,6 +18,9 @@ interface DayViewProps {
     onAddReservation?: (date: Date, service: ServiceType) => void;
     date: Date;
     onDateChange: (date: Date) => void;
+    greenThreshold?: number;
+    yellowThreshold?: number;
+    orangeThreshold?: number;
 }
 
 export function DayView({
@@ -27,6 +30,9 @@ export function DayView({
     onAddReservation,
     date,
     onDateChange,
+    greenThreshold = 60,
+    yellowThreshold = 80,
+    orangeThreshold = 99,
 }: DayViewProps) {
 
 
@@ -54,7 +60,11 @@ export function DayView({
     const dayReservations = getReservationsForDateAndService(reservations, date, selectedService);
 
     const totalGuests = dayReservations.reduce((sum, r) => sum + r.numGuests, 0);
-    const status = getCapacityStatus(totalGuests, maxCapacity);
+    const status = getCapacityStatus(totalGuests, maxCapacity, {
+        green: greenThreshold,
+        yellow: yellowThreshold,
+        orange: orangeThreshold,
+    });
 
     const getStatusColor = (status: CapacityStatus) => {
         switch (status.color) {
@@ -62,6 +72,8 @@ export function DayView({
                 return 'bg-green-500';
             case 'yellow':
                 return 'bg-yellow-500';
+            case 'orange':
+                return 'bg-orange-500';
             case 'red':
                 return 'bg-red-500';
             default:

@@ -15,6 +15,9 @@ interface CalendarViewProps {
     selectedService: ServiceType;
     maxCapacity: number;
     onDayClick: (date: Date) => void;
+    greenThreshold?: number;
+    yellowThreshold?: number;
+    orangeThreshold?: number;
 }
 
 export function CalendarView({
@@ -22,6 +25,9 @@ export function CalendarView({
     selectedService,
     maxCapacity,
     onDayClick,
+    greenThreshold,
+    yellowThreshold,
+    orangeThreshold,
 }: CalendarViewProps) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -149,6 +155,9 @@ export function CalendarView({
                             maxCapacity={maxCapacity}
                             selectedDate={selectedDate}
                             onClick={() => handleDayClick(date!)}
+                            greenThreshold={greenThreshold}
+                            yellowThreshold={yellowThreshold}
+                            orangeThreshold={orangeThreshold}
                         />
                     ))}
                 </div>

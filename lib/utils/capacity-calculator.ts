@@ -1,20 +1,34 @@
 import { Reservation, ServiceType, CapacityStatus } from '@/types';
-import { CAPACITY_THRESHOLDS } from '@/lib/constants';
+import { DEFAULT_CAPACITY_THRESHOLDS } from '@/lib/constants';
+
+interface ColorThresholds {
+    green: number;
+    yellow: number;
+    orange: number;
+}
 
 /**
  * Calculate capacity for a specific date and service
  */
 export function calculateCapacity(
     reservations: Reservation[],
-    maxCapacity: number
+    maxCapacity: number,
+    thresholds?: ColorThresholds
 ): CapacityStatus {
     const totalGuests = reservations.reduce((sum, res) => sum + res.numGuests, 0);
     const percentage = maxCapacity > 0 ? (totalGuests / maxCapacity) * 100 : 0;
 
-    let color: 'green' | 'yellow' | 'red' = 'green';
-    if (percentage >= CAPACITY_THRESHOLDS.YELLOW) {
+    // Use provided thresholds or defaults
+    const greenThreshold = thresholds?.green ?? DEFAULT_CAPACITY_THRESHOLDS.GREEN;
+    const yellowThreshold = thresholds?.yellow ?? DEFAULT_CAPACITY_THRESHOLDS.YELLOW;
+    const orangeThreshold = thresholds?.orange ?? DEFAULT_CAPACITY_THRESHOLDS.ORANGE;
+
+    let color: 'green' | 'yellow' | 'orange' | 'red' = 'green';
+    if (percentage > orangeThreshold) {
         color = 'red';
-    } else if (percentage >= CAPACITY_THRESHOLDS.GREEN) {
+    } else if (percentage >= yellowThreshold) {
+        color = 'orange';
+    } else if (percentage >= greenThreshold) {
         color = 'yellow';
     }
 
@@ -83,14 +97,22 @@ export function calculateDailyStats(
  */
 export function getCapacityStatus(
     totalGuests: number,
-    maxCapacity: number
+    maxCapacity: number,
+    thresholds?: ColorThresholds
 ): CapacityStatus {
     const percentage = maxCapacity > 0 ? (totalGuests / maxCapacity) * 100 : 0;
 
-    let color: 'green' | 'yellow' | 'red' = 'green';
-    if (percentage >= CAPACITY_THRESHOLDS.YELLOW) {
+    // Use provided thresholds or defaults
+    const greenThreshold = thresholds?.green ?? DEFAULT_CAPACITY_THRESHOLDS.GREEN;
+    const yellowThreshold = thresholds?.yellow ?? DEFAULT_CAPACITY_THRESHOLDS.YELLOW;
+    const orangeThreshold = thresholds?.orange ?? DEFAULT_CAPACITY_THRESHOLDS.ORANGE;
+
+    let color: 'green' | 'yellow' | 'orange' | 'red' = 'green';
+    if (percentage > orangeThreshold) {
         color = 'red';
-    } else if (percentage >= CAPACITY_THRESHOLDS.GREEN) {
+    } else if (percentage >= yellowThreshold) {
+        color = 'orange';
+    } else if (percentage >= greenThreshold) {
         color = 'yellow';
     }
 
