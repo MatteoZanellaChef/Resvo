@@ -119,7 +119,8 @@ export function WeekView({
                     </Button>
 
                     <h2 className="text-2xl sm:text-3xl font-bold">
-                        {formatDate(weekStart, 'd MMM')} - {formatDate(weekEnd, 'd MMM yyyy')}
+                        {formatDate(weekStart, 'd MMM')} - {formatDate(weekEnd, 'd MMM')}
+                        <span className="hidden sm:inline"> {formatDate(weekEnd, 'yyyy')}</span>
                     </h2>
 
                     <Button

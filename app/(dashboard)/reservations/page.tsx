@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card } from '@/components/ui/card';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
-import { Plus, Search, Filter, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, Loader2, X } from 'lucide-react';
 import { useRestaurantSettings } from '@/lib/contexts/restaurant-settings-context';
 import { reservationsService } from '@/lib/supabase/services/reservations.service';
 
@@ -198,48 +198,81 @@ export default function ReservationsPage() {
             </div>
 
             {/* Filters */}
-            <Card className="p-4">
-                <div className="flex items-center gap-2 mb-4">
-                    <Filter className="h-4 w-4 text-muted-foreground" />
-                    <h3 className="font-semibold">Filtri</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {/* Search */}
-                    <div className="relative md:col-span-2">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Cerca per nome, telefono o email..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10"
-                        />
+            <Card className="p-4 border-none shadow-md bg-card/50 backdrop-blur-sm">
+                <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Filter className="h-4 w-4 text-primary" />
+                            <h3 className="font-semibold">Filtri</h3>
+                        </div>
+                        {(searchQuery || serviceFilter !== 'all' || statusFilter !== 'all') && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setServiceFilter('all');
+                                    setStatusFilter('all');
+                                }}
+                                className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                            >
+                                <X className="h-3 w-3 mr-1" />
+                                Reset
+                            </Button>
+                        )}
                     </div>
 
-                    {/* Service Filter */}
-                    <Select value={serviceFilter} onValueChange={(value) => setServiceFilter(value as any)}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Tutti i servizi" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Tutti i servizi</SelectItem>
-                            <SelectItem value="lunch">☀️ Pranzo</SelectItem>
-                            <SelectItem value="dinner">🌙 Cena</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <div className="flex flex-col md:flex-row gap-3">
+                        {/* Search - Full width on mobile, Flex-1 on desktop */}
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Cerca..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-9 bg-background/50 h-10"
+                            />
+                        </div>
 
-                    {/* Status Filter */}
-                    <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Tutti gli stati" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Tutti gli stati</SelectItem>
-                            <SelectItem value="confirmed">Confermate</SelectItem>
-                            <SelectItem value="pending">In Attesa</SelectItem>
-                            <SelectItem value="cancelled">Cancellate</SelectItem>
-                            <SelectItem value="completed">Completate</SelectItem>
-                        </SelectContent>
-                    </Select>
+                        {/* Selectors - Side by side on mobile, centered */}
+                        <div className="flex flex-row justify-center gap-3 w-full md:w-auto">
+                            <div className="w-[45%] md:w-[150px] max-w-[200px]">
+                                <Select value={serviceFilter} onValueChange={(value) => setServiceFilter(value as any)}>
+                                    <SelectTrigger className="h-10 bg-background/50 text-center justify-center">
+                                        <div className="flex items-center gap-2">
+                                            <span className="truncate">{serviceFilter === 'all' ? 'Servizio' : (serviceFilter === 'lunch' ? 'Pranzo' : 'Cena')}</span>
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Tutti</SelectItem>
+                                        <SelectItem value="lunch">☀️ Pranzo</SelectItem>
+                                        <SelectItem value="dinner">🌙 Cena</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="w-[45%] md:w-[150px] max-w-[200px]">
+                                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+                                    <SelectTrigger className="h-10 bg-background/50 text-center justify-center">
+                                        <div className="flex items-center gap-2">
+                                            <span className="truncate">{statusFilter === 'all' ? 'Stato' : (
+                                                statusFilter === 'confirmed' ? 'Confermate' :
+                                                    statusFilter === 'pending' ? 'In Attesa' :
+                                                        statusFilter === 'cancelled' ? 'Cancellate' : 'Completate'
+                                            )}</span>
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Tutti</SelectItem>
+                                        <SelectItem value="confirmed">Confermate</SelectItem>
+                                        <SelectItem value="pending">In Attesa</SelectItem>
+                                        <SelectItem value="cancelled">Cancellate</SelectItem>
+                                        <SelectItem value="completed">Completate</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </Card>
 
