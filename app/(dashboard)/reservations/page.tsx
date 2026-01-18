@@ -198,74 +198,69 @@ export default function ReservationsPage() {
             </div>
 
             {/* Filters */}
-            <Card className="p-4 border-none shadow-md bg-card/50 backdrop-blur-sm">
-                <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <Filter className="h-4 w-4 text-primary" />
-                            <h3 className="font-semibold">Filtri</h3>
+            <Card className="p-3 sm:p-4 border-none shadow-md bg-card/50 backdrop-blur-sm">
+                <div className="flex flex-col gap-3">
+                    {/* Header */}
+                    <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-primary" />
+                        <h3 className="font-semibold text-sm sm:text-base">Filtri</h3>
+                    </div>
+
+                    {/* Search - Full width */}
+                    <div className="relative w-full">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Cerca..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-9 bg-background/50 h-11 sm:h-10"
+                        />
+                    </div>
+
+                    {/* Selectors + Reset Button */}
+                    <div className="flex gap-2 sm:gap-3">
+                        <div className="grid grid-cols-2 gap-2 sm:gap-3 flex-1">
+                            <Select value={serviceFilter} onValueChange={(value) => setServiceFilter(value as ServiceType | 'all')}>
+                                <SelectTrigger className="h-11 sm:h-10 bg-background/50 text-sm">
+                                    <SelectValue placeholder="Servizio" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tutti</SelectItem>
+                                    <SelectItem value="lunch">☀️ Pranzo</SelectItem>
+                                    <SelectItem value="dinner">🌙 Cena</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as ReservationStatus | 'all')}>
+                                <SelectTrigger className="h-11 sm:h-10 bg-background/50 text-sm">
+                                    <SelectValue placeholder="Stato" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tutti</SelectItem>
+                                    <SelectItem value="confirmed">Confermate</SelectItem>
+                                    <SelectItem value="pending">In Attesa</SelectItem>
+                                    <SelectItem value="cancelled">Cancellate</SelectItem>
+                                    <SelectItem value="completed">Completate</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
+
+                        {/* Reset Button */}
                         {(searchQuery || serviceFilter !== 'all' || statusFilter !== 'all') && (
                             <Button
-                                variant="ghost"
-                                size="sm"
+                                variant="outline"
+                                size="icon"
                                 onClick={() => {
                                     setSearchQuery('');
                                     setServiceFilter('all');
                                     setStatusFilter('all');
                                 }}
-                                className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                                className="h-11 sm:h-10 w-11 sm:w-10 flex-shrink-0"
+                                title="Reset filtri"
                             >
-                                <X className="h-3 w-3 mr-1" />
-                                Reset
+                                <X className="h-4 w-4" />
                             </Button>
                         )}
-                    </div>
-
-                    <div className="flex flex-col md:flex-row gap-3">
-                        {/* Search - Full width on mobile, Flex-1 on desktop */}
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Cerca..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 bg-background/50 h-10"
-                            />
-                        </div>
-
-                        {/* Selectors - Side by side on mobile, centered */}
-                        <div className="flex flex-row justify-center gap-3 w-full md:w-auto">
-                            <div className="w-[45%] md:w-[150px] max-w-[200px]">
-                                <Select value={serviceFilter} onValueChange={(value) => setServiceFilter(value as ServiceType | 'all')}>
-                                    <SelectTrigger className="h-10 bg-background/50">
-                                        <SelectValue placeholder="Servizio" />
-                                    </SelectTrigger>
-
-                                    <SelectContent>
-                                        <SelectItem value="all">Tutti</SelectItem>
-                                        <SelectItem value="lunch">☀️ Pranzo</SelectItem>
-                                        <SelectItem value="dinner">🌙 Cena</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="w-[45%] md:w-[150px] max-w-[200px]">
-                                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as ReservationStatus | 'all')}>
-                                    <SelectTrigger className="h-10 bg-background/50">
-                                        <SelectValue placeholder="Stato" />
-                                    </SelectTrigger>
-
-                                    <SelectContent>
-                                        <SelectItem value="all">Tutti</SelectItem>
-                                        <SelectItem value="confirmed">Confermate</SelectItem>
-                                        <SelectItem value="pending">In Attesa</SelectItem>
-                                        <SelectItem value="cancelled">Cancellate</SelectItem>
-                                        <SelectItem value="completed">Completate</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </Card>

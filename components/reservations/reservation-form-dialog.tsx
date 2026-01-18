@@ -14,7 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from 'sonner';
 import { CalendarIcon, Save } from 'lucide-react';
-import { formatDate } from '@/lib/utils/date-utils';
+import { formatDate, normalizeToMidnight } from '@/lib/utils/date-utils';
 import { cn } from '@/lib/utils';
 import { DEFAULT_TIME_SLOTS } from '@/lib/constants';
 import { useRestaurantSettings } from '@/lib/contexts/restaurant-settings-context';
@@ -36,7 +36,7 @@ export function ReservationFormDialog({
     const { restaurant } = useRestaurantSettings();
     const [tables, setTables] = useState<Table[]>([]);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-        reservation ? new Date(reservation.date) : new Date()
+        reservation ? normalizeToMidnight(new Date(reservation.date)) : normalizeToMidnight(new Date())
     );
     const [selectedService, setSelectedService] = useState<ServiceType>(
         reservation?.serviceType || 'dinner'
@@ -89,7 +89,7 @@ export function ReservationFormDialog({
     useEffect(() => {
         if (open) {
             if (reservation) {
-                const date = new Date(reservation.date);
+                const date = normalizeToMidnight(new Date(reservation.date));
                 setSelectedDate(date);
                 setSelectedService(reservation.serviceType);
                 reset({
@@ -105,7 +105,7 @@ export function ReservationFormDialog({
                     status: reservation.status,
                 });
             } else {
-                setSelectedDate(new Date());
+                setSelectedDate(normalizeToMidnight(new Date()));
                 setSelectedService('dinner');
                 reset({
                     customerName: '',
@@ -219,8 +219,9 @@ export function ReservationFormDialog({
                                         mode="single"
                                         selected={selectedDate}
                                         onSelect={(date) => {
-                                            setSelectedDate(date);
-                                            setValue('date', date!);
+                                            const normalized = normalizeToMidnight(date);
+                                            setSelectedDate(normalized);
+                                            setValue('date', normalized);
                                         }}
                                         initialFocus
                                     />

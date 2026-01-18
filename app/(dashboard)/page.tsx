@@ -13,6 +13,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarIcon, CalendarDays, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { normalizeToMidnight } from '@/lib/utils/date-utils';
 
 type ViewType = 'month' | 'week' | 'day';
 
@@ -72,7 +73,7 @@ export default function HomePage() {
 
 
     const handleAddReservation = (date: Date, service: ServiceType) => {
-        setPrefilledDate(date);
+        setPrefilledDate(normalizeToMidnight(date));
         setPrefilledService(service);
         setReservationFormOpen(true);
     };

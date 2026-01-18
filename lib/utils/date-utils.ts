@@ -78,6 +78,19 @@ export function createDate(year: number, month: number, day: number): Date {
 }
 
 /**
+ * Normalize a date to midnight (00:00:00.000) in local timezone
+ * This prevents timezone issues when working with date-only values
+ */
+export function normalizeToMidnight(date: Date | undefined): Date {
+    if (!date) {
+        date = new Date();
+    }
+    const normalized = new Date(date);
+    normalized.setHours(0, 0, 0, 0);
+    return normalized;
+}
+
+/**
  * Format a date for database (YYYY-MM-DD) using local time
  * This avoids timezone issues where toISOString() might return previous day
  */

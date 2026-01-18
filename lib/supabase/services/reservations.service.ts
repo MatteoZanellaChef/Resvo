@@ -145,11 +145,7 @@ export class ReservationsService {
         restaurantId: string,
         reservation: Omit<Reservation, 'id' | 'restaurantId' | 'createdAt' | 'updatedAt'>
     ): Promise<Reservation> {
-        console.log('Creating reservation with date:', reservation.date);
-        console.log('Formatted date for DB:', formatDateForDatabase(reservation.date));
-
         const { data, error } = await supabase
-
             .from('reservations')
             .insert({
                 restaurant_id: restaurantId,
@@ -252,17 +248,13 @@ export class ReservationsService {
     /**
      * Map database row to Reservation type
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private mapToReservation(data: any): Reservation {
-        // Parse date string (YYYY-MM-DD) as local date at midnight to avoid UTC offsets
-        const [year, month, day] = data.reservation_date.split('-').map(Number);
-        const localDate = new Date(year, month - 1, day);
-
         return {
             id: data.id,
             restaurantId: data.restaurant_id,
-            date: localDate,
+            date: new Date(data.reservation_date),
             time: data.reservation_time,
-
             serviceType: data.service_type,
             numGuests: data.num_guests,
             customerName: data.customer_name,
