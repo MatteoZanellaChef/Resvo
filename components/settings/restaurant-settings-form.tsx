@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { restaurantSettingsSchema, type RestaurantSettingsFormData } from '@/lib/utils/validators';
-import { mockRestaurant } from '@/lib/mock-data';
+import { useRestaurantSettings } from '@/lib/contexts/restaurant-settings-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,7 @@ import { Save } from 'lucide-react';
 
 export function RestaurantSettingsForm() {
     const [isSaving, setIsSaving] = useState(false);
+    const { restaurant, updateSettings } = useRestaurantSettings();
 
     const {
         register,
@@ -22,22 +23,25 @@ export function RestaurantSettingsForm() {
     } = useForm<RestaurantSettingsFormData>({
         resolver: zodResolver(restaurantSettingsSchema),
         defaultValues: {
-            name: mockRestaurant.name,
-            maxCapacityLunch: mockRestaurant.maxCapacityLunch,
-            maxCapacityDinner: mockRestaurant.maxCapacityDinner,
-            defaultTableDuration: mockRestaurant.defaultTableDuration,
+            name: restaurant.name,
+            maxCapacityLunch: restaurant.maxCapacityLunch,
+            maxCapacityDinner: restaurant.maxCapacityDinner,
+            defaultTableDuration: restaurant.defaultTableDuration,
         },
     });
 
     const onSubmit = async (data: RestaurantSettingsFormData) => {
         setIsSaving(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        console.log('Settings saved:', data);
-        toast.success('Impostazioni salvate con successo!');
-        setIsSaving(false);
+        try {
+            await updateSettings(data);
+            toast.success('Impostazioni salvate con successo!');
+        } catch (error) {
+            toast.error('Errore nel salvataggio delle impostazioni');
+            console.error('Error saving settings:', error);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (

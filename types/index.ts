@@ -20,12 +20,20 @@ export interface Restaurant {
     createdAt: Date;
 }
 
+export interface RoomSpace {
+    id: string;
+    value: string;        // unique identifier used in tables
+    label: string;        // display name
+    isDefault: boolean;   // true for interno/esterno/veranda
+    order: number;        // display order
+}
+
 export interface Table {
     id: string;
     restaurantId: string;
     tableNumber: string;
     capacity: number;
-    position: 'interno' | 'esterno' | 'veranda';
+    position: string;  // dynamic space value instead of hardcoded union
     isActive: boolean;
 }
 

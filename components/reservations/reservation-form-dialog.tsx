@@ -57,7 +57,6 @@ export function ReservationFormDialog({
             numGuests: reservation.numGuests,
             tableId: reservation.tableId,
             notes: reservation.notes || '',
-            specialRequests: reservation.specialRequests || '',
             status: reservation.status,
         } : {
             customerName: '',
@@ -69,7 +68,6 @@ export function ReservationFormDialog({
             numGuests: 2,
             tableId: '',
             notes: '',
-            specialRequests: '',
             status: 'confirmed',
         },
     });
@@ -272,22 +270,14 @@ export function ReservationFormDialog({
 
                     {/* Notes */}
                     <div className="space-y-2">
-                        <Label htmlFor="notes">Note</Label>
+                        <Label htmlFor="notes">Note e Richieste Speciali</Label>
                         <Input
                             id="notes"
                             {...register('notes')}
-                            placeholder="Cliente abituale, preferisce tavolo esterno..."
+                            placeholder="Intolleranze, preferenze, seggiolone, torta..."
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="specialRequests">Richieste Speciali</Label>
-                        <Input
-                            id="specialRequests"
-                            {...register('specialRequests')}
-                            placeholder="Intolleranze, seggiolone, torta..."
-                        />
-                    </div>
 
                     {/* Actions */}
                     <div className="flex justify-end gap-2 pt-4">

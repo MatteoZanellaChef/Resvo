@@ -11,17 +11,29 @@ export const reservationSchema = z.object({
     numGuests: z.number().min(1, { message: 'Minimo 1 ospite' }).max(50, { message: 'Massimo 50 ospiti' }),
     tableId: z.string().optional(),
     notes: z.string().optional(),
-    specialRequests: z.string().optional(),
     status: z.enum(['confirmed', 'pending', 'cancelled', 'completed']).default('confirmed'),
 });
 
 export type ReservationFormData = z.infer<typeof reservationSchema>;
 
+// Space validation schema
+export const spaceSchema = z.object({
+    label: z.string()
+        .min(2, { message: 'Il nome deve essere di almeno 2 caratteri' })
+        .max(30, { message: 'Il nome non può superare 30 caratteri' }),
+    value: z.string()
+        .min(2, { message: 'Il valore deve essere di almeno 2 caratteri' })
+        .max(30, { message: 'Il valore non può superare 30 caratteri' })
+        .regex(/^[a-z0-9_-]+$/, { message: 'Usa solo lettere minuscole, numeri, trattini e underscore' }),
+});
+
+export type SpaceFormData = z.infer<typeof spaceSchema>;
+
 // Table validation schema
 export const tableSchema = z.object({
     tableNumber: z.string().min(1, { message: 'Inserisci il numero del tavolo' }),
     capacity: z.number().min(1, { message: 'La capacità deve essere almeno 1' }).max(20, { message: 'Massimo 20 persone' }),
-    position: z.enum(['interno', 'esterno', 'veranda']),
+    position: z.string().min(1, { message: 'Seleziona una posizione' }),
     isActive: z.boolean().default(true),
 });
 

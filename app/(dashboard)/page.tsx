@@ -7,7 +7,8 @@ import { WeekView } from '@/components/calendar/week-view';
 import { DayView } from '@/components/calendar/day-view';
 import { ServiceToggle } from '@/components/calendar/service-toggle';
 import { ReservationFormDialog } from '@/components/reservations/reservation-form-dialog';
-import { mockReservations, mockRestaurant } from '@/lib/mock-data';
+import { mockReservations } from '@/lib/mock-data';
+import { useRestaurantSettings } from '@/lib/contexts/restaurant-settings-context';
 import { Toaster } from '@/components/ui/sonner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -24,9 +25,11 @@ export default function HomePage() {
     const [prefilledService, setPrefilledService] = useState<ServiceType>('dinner');
     const [viewType, setViewType] = useState<ViewType>('month');
 
+    const { restaurant } = useRestaurantSettings();
+
     const maxCapacity = selectedService === 'lunch'
-        ? mockRestaurant.maxCapacityLunch
-        : mockRestaurant.maxCapacityDinner;
+        ? restaurant.maxCapacityLunch
+        : restaurant.maxCapacityDinner;
 
     const handleDayClick = (date: Date) => {
         setSelectedDate(date);
