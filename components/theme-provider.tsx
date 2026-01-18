@@ -20,6 +20,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         // Load theme from localStorage
         const savedTheme = localStorage.getItem('theme') as Theme | null;
         if (savedTheme) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setTheme(savedTheme);
         }
     }, []);
@@ -31,9 +32,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         if (theme === 'system') {
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             root.classList.add(systemTheme);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setActualTheme(systemTheme);
         } else {
             root.classList.add(theme);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setActualTheme(theme);
         }
 

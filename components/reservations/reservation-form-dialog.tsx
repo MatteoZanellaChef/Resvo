@@ -50,6 +50,7 @@ export function ReservationFormDialog({
         formState: { errors },
         reset,
     } = useForm<ReservationFormData>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(reservationSchema) as any,
         defaultValues: {
             customerName: '',
@@ -316,7 +317,7 @@ export function ReservationFormDialog({
                         <Label htmlFor="status">Stato</Label>
                         <Select
                             value={watchedStatus}
-                            onValueChange={(value) => setValue('status', value as any)}
+                            onValueChange={(value) => setValue('status', value as 'confirmed' | 'pending' | 'cancelled' | 'completed')}
                         >
                             <SelectTrigger id="status">
                                 <SelectValue />

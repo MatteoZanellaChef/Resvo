@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -68,7 +68,7 @@ export default function StatisticsPage() {
         [selectedPeriod]
     );
 
-    const fetchReservations = async () => {
+    const fetchReservations = useCallback(async () => {
         if (!restaurant) return;
 
         try {
@@ -87,11 +87,11 @@ export default function StatisticsPage() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [restaurant, period]);
 
     useEffect(() => {
         fetchReservations();
-    }, [restaurant, period]); // Re-fetch when restaurant or period changes
+    }, [fetchReservations]); // Re-fetch when restaurant or period changes
 
     const stats = useMemo(
         () => calculateStats(reservations, period.start, period.end),
@@ -137,11 +137,13 @@ export default function StatisticsPage() {
         : 0;
 
     // Custom tooltip
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
                 <div className="bg-background border rounded-lg shadow-lg p-3">
                     <p className="font-semibold mb-2">{label}</p>
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {payload.map((entry: any, index: number) => (
                         <p key={index} className="text-sm" style={{ color: entry.color }}>
                             {entry.name}: <span className="font-bold">{entry.value}</span>

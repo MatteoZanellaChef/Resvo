@@ -2,15 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CalendarDays } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Reservation, ServiceType, CapacityStatus } from '@/types';
 import { getReservationsForDateAndService, getCapacityStatus } from '@/lib/utils/capacity-calculator';
 import { formatDate } from '@/lib/utils/date-utils';
 import { useSwipe } from '@/lib/hooks/use-swipe';
-
-type ViewType = 'month' | 'week' | 'day';
 
 interface WeekViewProps {
     reservations: Reservation[];
@@ -40,9 +38,7 @@ export function WeekView({
         setCurrentDate(addWeeks(currentDate, 1));
     };
 
-    const handleToday = () => {
-        setCurrentDate(new Date());
-    };
+
 
     // Swipe gesture support
     const { handleTouchStart, handleTouchMove, handleTouchEnd } = useSwipe({

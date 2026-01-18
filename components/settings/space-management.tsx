@@ -26,6 +26,7 @@ export function SpaceManagement() {
         reset,
         formState: { errors },
     } = useForm<SpaceFormData>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(spaceSchema) as any,
         defaultValues: {
             label: '',
@@ -65,7 +66,7 @@ export function SpaceManagement() {
         try {
             await deleteSpace(space.id);
             toast.success('Spazio eliminato!');
-        } catch (error) {
+        } catch {
             toast.error('Errore durante l\'eliminazione dello spazio');
         }
     };

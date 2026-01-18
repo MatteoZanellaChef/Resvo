@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 
 interface SwipeConfig {
     onSwipeLeft?: () => void;

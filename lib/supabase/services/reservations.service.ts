@@ -173,6 +173,7 @@ export class ReservationsService {
         id: string,
         updates: Partial<Omit<Reservation, 'id' | 'restaurantId' | 'createdAt' | 'updatedAt'>>
     ): Promise<void> {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const updateData: any = {};
 
         if (updates.date) updateData.reservation_date = updates.date.toISOString().split('T')[0];
@@ -239,6 +240,7 @@ export class ReservationsService {
     /**
      * Map database row to Reservation type
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private mapToReservation(data: any): Reservation {
         return {
             id: data.id,

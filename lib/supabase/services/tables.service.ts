@@ -101,6 +101,10 @@ export class TablesService {
     /**
      * Map database row to Table type
      */
+    /**
+     * Map database row to Table type
+     */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private mapToTable(data: any): Table {
         return {
             id: data.id,

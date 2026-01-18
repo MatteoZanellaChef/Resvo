@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Calendar, CalendarDays, CalendarRange } from 'lucide-react';
+import { Calendar, CalendarDays } from 'lucide-react';
 
 type ViewType = 'month' | 'week';
 

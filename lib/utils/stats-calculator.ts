@@ -1,4 +1,4 @@
-import { Reservation, ServiceType } from '@/types';
+import { Reservation } from '@/types';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 import { it } from 'date-fns/locale';
 

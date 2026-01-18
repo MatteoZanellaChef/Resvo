@@ -27,7 +27,7 @@ export class RestaurantService {
      */
     async getOrCreateRestaurant(userId: string, defaultName: string = 'Il Mio Ristorante'): Promise<Restaurant | null> {
         // Try to get existing
-        let restaurant = await this.getRestaurant(userId);
+        const restaurant = await this.getRestaurant(userId);
 
         if (restaurant) {
             return restaurant;
@@ -67,6 +67,7 @@ export class RestaurantService {
      * Update restaurant settings
      */
     async updateRestaurant(restaurantId: string, updates: Partial<Restaurant>): Promise<void> {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const updateData: any = {};
         if (updates.name !== undefined) updateData.name = updates.name;
         if (updates.maxCapacityLunch !== undefined) updateData.max_capacity_lunch = updates.maxCapacityLunch;
@@ -95,6 +96,7 @@ export class RestaurantService {
     /**
      * Map database row to Restaurant type
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private mapToRestaurant(data: any): Restaurant {
         return {
             id: data.id,

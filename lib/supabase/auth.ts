@@ -23,6 +23,7 @@ export async function signIn(email: string, password: string): Promise<{ user: U
             message: error.message,
             status: error.status,
             name: error.name,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             code: (error as any).code,
         });
 

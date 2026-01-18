@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Restaurant, RoomSpace, Table } from '@/types';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { restaurantService } from '@/lib/supabase/services/restaurant.service';
@@ -31,18 +31,9 @@ export function RestaurantSettingsProvider({ children }: { children: ReactNode }
     const [tables, setTables] = useState<Table[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Load all data when user is authenticated
-    useEffect(() => {
-        if (authLoading) return;
 
-        if (user) {
-            loadAllData();
-        } else {
-            setIsLoading(false);
-        }
-    }, [user, authLoading]);
 
-    const loadAllData = async () => {
+    const loadAllData = useCallback(async () => {
         if (!user) return;
 
         try {
@@ -67,7 +58,18 @@ export function RestaurantSettingsProvider({ children }: { children: ReactNode }
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [user]);
+
+    // Load all data when user is authenticated
+    useEffect(() => {
+        if (authLoading) return;
+
+        if (user) {
+            loadAllData();
+        } else {
+            setIsLoading(false);
+        }
+    }, [user, authLoading, loadAllData]);
 
     const refreshAll = async () => {
         await loadAllData();

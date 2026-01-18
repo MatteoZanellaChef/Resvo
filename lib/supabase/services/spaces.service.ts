@@ -81,6 +81,10 @@ export class SpacesService {
     /**
      * Map database row to RoomSpace type
      */
+    /**
+     * Map database row to RoomSpace type
+     */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private mapToRoomSpace(data: any): RoomSpace {
         return {
             id: data.id,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Reservation, ServiceType, ReservationStatus } from '@/types';
 import { ReservationCard } from '@/components/reservations/reservation-card';
 import { ReservationFormDialog } from '@/components/reservations/reservation-form-dialog';
@@ -27,14 +27,7 @@ export default function ReservationsPage() {
     const [statusFilter, setStatusFilter] = useState<ReservationStatus | 'all'>('all');
     const [sortBy, setSortBy] = useState<'date' | 'time'>('date');
 
-    // Load reservations
-    useEffect(() => {
-        if (restaurant && restaurant.id) {
-            loadReservations();
-        }
-    }, [restaurant]);
-
-    const loadReservations = async () => {
+    const loadReservations = useCallback(async () => {
         if (!restaurant) return;
 
         try {
@@ -47,7 +40,14 @@ export default function ReservationsPage() {
         } finally {
             setIsLoadingReservations(false);
         }
-    };
+    }, [restaurant]);
+
+    // Load reservations
+    useEffect(() => {
+        if (restaurant && restaurant.id) {
+            loadReservations();
+        }
+    }, [restaurant, loadReservations]);
 
     // Filter and search logic
     const filteredReservations = useMemo(() => {
@@ -138,7 +138,7 @@ export default function ReservationsPage() {
                 await reservationsService.updateReservation(editingReservation.id, data);
                 toast.success('Prenotazione aggiornata');
             } else {
-                await reservationsService.createReservation(restaurant.id, data as any);
+                await reservationsService.createReservation(restaurant.id, data as Omit<Reservation, 'id' | 'createdAt' | 'updatedAt'>);
                 toast.success('Prenotazione creata');
             }
 
@@ -237,7 +237,7 @@ export default function ReservationsPage() {
                         {/* Selectors - Side by side on mobile, centered */}
                         <div className="flex flex-row justify-center gap-3 w-full md:w-auto">
                             <div className="w-[45%] md:w-[150px] max-w-[200px]">
-                                <Select value={serviceFilter} onValueChange={(value) => setServiceFilter(value as any)}>
+                                <Select value={serviceFilter} onValueChange={(value) => setServiceFilter(value as ServiceType | 'all')}>
                                     <SelectTrigger className="h-10 bg-background/50 text-center justify-center">
                                         <div className="flex items-center gap-2">
                                             <span className="truncate">{serviceFilter === 'all' ? 'Servizio' : (serviceFilter === 'lunch' ? 'Pranzo' : 'Cena')}</span>
@@ -252,7 +252,7 @@ export default function ReservationsPage() {
                             </div>
 
                             <div className="w-[45%] md:w-[150px] max-w-[200px]">
-                                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+                                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as ReservationStatus | 'all')}>
                                     <SelectTrigger className="h-10 bg-background/50 text-center justify-center">
                                         <div className="flex items-center gap-2">
                                             <span className="truncate">{statusFilter === 'all' ? 'Stato' : (
@@ -282,7 +282,7 @@ export default function ReservationsPage() {
                     <h3 className="text-lg font-semibold">
                         {filteredReservations.length} {filteredReservations.length === 1 ? 'Prenotazione' : 'Prenotazioni'}
                     </h3>
-                    <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
+                    <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'date' | 'time')}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue />
                         </SelectTrigger>

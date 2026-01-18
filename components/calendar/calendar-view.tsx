@@ -2,9 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Reservation, ServiceType } from '@/types';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CalendarDays } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { DayCell } from './day-cell';
 import { formatDate, getNumberOfDaysInMonth, getFirstDayOfMonth, goToNextMonth, goToPreviousMonth, createDate } from '@/lib/utils/date-utils';
 import { useSwipe } from '@/lib/hooks/use-swipe';

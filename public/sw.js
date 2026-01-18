@@ -1,5 +1,4 @@
 // Service Worker for Resvo PWA
-const CACHE_NAME = 'resvo-v1';
 const STATIC_CACHE = 'resvo-static-v1';
 const DYNAMIC_CACHE = 'resvo-dynamic-v1';
 

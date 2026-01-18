@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Calendar, ListOrdered, BarChart3, Settings, X, UtensilsCrossed } from 'lucide-react';

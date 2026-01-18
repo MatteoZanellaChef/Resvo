@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { isSameDay, format } from 'date-fns';
+import { isSameDay } from 'date-fns';
 import { ChevronLeft, ChevronRight, Plus, Users, Phone, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -15,7 +15,7 @@ interface DayViewProps {
     reservations: Reservation[];
     selectedService: ServiceType;
     maxCapacity: number;
-    onDayClick: (date: Date) => void;
+    onDayClick?: (date: Date) => void;
     onAddReservation?: (date: Date, service: ServiceType) => void;
     initialDate?: Date | null; // Optional initial date to display
 }
@@ -24,17 +24,19 @@ export function DayView({
     reservations,
     selectedService,
     maxCapacity,
-    onDayClick,
+    // onDayClick, // Kept in props interface but unused in component logic currently
     onAddReservation,
     initialDate,
 }: DayViewProps) {
     const [currentDate, setCurrentDate] = useState(initialDate || new Date());
 
     // Sync with initialDate when it changes (e.g., when clicking a day from calendar)
+    // Sync with initialDate when it changes (e.g., when clicking a day from calendar)
     useEffect(() => {
-        if (initialDate) {
+        if (initialDate && !isSameDay(initialDate, currentDate)) {
             setCurrentDate(initialDate);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialDate]);
 
     const handlePreviousDay = () => {
@@ -104,13 +106,15 @@ export function DayView({
             }
         );
 
-        if (bottomActionsRef.current) {
-            observer.observe(bottomActionsRef.current);
+        const currentRef = bottomActionsRef.current;
+
+        if (currentRef) {
+            observer.observe(currentRef);
         }
 
         return () => {
-            if (bottomActionsRef.current) {
-                observer.unobserve(bottomActionsRef.current);
+            if (currentRef) {
+                observer.unobserve(currentRef);
             }
         };
     }, []);
@@ -247,7 +251,7 @@ export function DayView({
                                             )}
                                             {reservation.notes && (
                                                 <p className="text-xs italic line-clamp-2 mt-2">
-                                                    "{reservation.notes}"
+                                                    &quot;{reservation.notes}&quot;
                                                 </p>
                                             )}
                                         </div>

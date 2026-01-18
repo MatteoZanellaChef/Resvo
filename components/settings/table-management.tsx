@@ -29,6 +29,7 @@ export function TableManagement() {
         watch,
         formState: { errors },
     } = useForm<TableFormData>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(tableSchema) as any,
         defaultValues: {
             tableNumber: '',
@@ -66,7 +67,7 @@ export function TableManagement() {
         try {
             await deleteTable(tableId);
             toast.success('Tavolo eliminato');
-        } catch (error) {
+        } catch {
             toast.error('Errore durante l\'eliminazione');
         }
     };
@@ -85,7 +86,7 @@ export function TableManagement() {
 
             setIsDialogOpen(false);
             reset();
-        } catch (error) {
+        } catch {
             toast.error('Errore durante il salvataggio');
         }
     };

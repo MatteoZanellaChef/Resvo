@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ServiceType, Reservation } from '@/types';
 import { CalendarView } from '@/components/calendar/calendar-view';
 import { WeekView } from '@/components/calendar/week-view';
@@ -27,14 +27,7 @@ export default function HomePage() {
     const [viewType, setViewType] = useState<ViewType>('month');
     const [isLoadingReservations, setIsLoadingReservations] = useState(true);
 
-    // Load reservations for the current month
-    useEffect(() => {
-        if (restaurant && restaurant.id) {
-            loadReservations();
-        }
-    }, [restaurant]);
-
-    const loadReservations = async () => {
+    const loadReservations = useCallback(async () => {
         if (!restaurant) return;
 
         try {
@@ -58,7 +51,14 @@ export default function HomePage() {
         } finally {
             setIsLoadingReservations(false);
         }
-    };
+    }, [restaurant]);
+
+    // Load reservations for the current month
+    useEffect(() => {
+        if (restaurant && restaurant.id) {
+            loadReservations();
+        }
+    }, [restaurant, loadReservations]);
 
     const maxCapacity = selectedService === 'lunch'
         ? restaurant?.maxCapacityLunch || 80
@@ -85,7 +85,7 @@ export default function HomePage() {
                 toast.success('Prenotazione aggiornata');
             } else {
                 // Create new reservation
-                await reservationsService.createReservation(restaurant.id, data as any);
+                await reservationsService.createReservation(restaurant.id, data as Omit<Reservation, 'id' | 'createdAt' | 'updatedAt'>);
                 toast.success('Prenotazione creata');
             }
 

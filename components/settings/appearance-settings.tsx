@@ -14,7 +14,7 @@ export function AppearanceSettings() {
             <CardHeader>
                 <CardTitle>Aspetto</CardTitle>
                 <CardDescription>
-                    Personalizza il tema dell'applicazione
+                    Personalizza il tema dell&apos;applicazione
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">

@@ -18,6 +18,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
 
     useEffect(() => {
         // Set date only on client side to avoid hydration mismatch
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentDate(new Date().toLocaleDateString('it-IT', {
             weekday: 'long',
             year: 'numeric',
