@@ -52,8 +52,8 @@ export function DayCell({
         <div
             onClick={currentMonth ? onClick : undefined}
             className={cn(
-                // Responsive height: smaller on mobile, larger on desktop
-                'min-h-[56px] sm:min-h-[80px] md:min-h-[100px]',
+                // Fixed height: uniform on all screens
+                'h-[56px] sm:h-[80px] md:h-[100px]',
                 // Responsive padding
                 'p-1.5 sm:p-2 md:p-3',
                 // Border and radius
