@@ -95,7 +95,7 @@ export function ReservationFormDialog({
                 setSelectedService(reservation.serviceType);
                 reset({
                     customerName: reservation.customerName,
-                    customerPhone: reservation.customerPhone,
+                    customerPhone: reservation.customerPhone || '',
                     customerEmail: reservation.customerEmail || '',
                     date: date,
                     time: reservation.time,
@@ -173,7 +173,7 @@ export function ReservationFormDialog({
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="customerPhone">Telefono *</Label>
+                            <Label htmlFor="customerPhone">Telefono</Label>
                             <Input
                                 id="customerPhone"
                                 type="tel"

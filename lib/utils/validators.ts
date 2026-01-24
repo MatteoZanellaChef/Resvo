@@ -3,7 +3,8 @@ import { z } from 'zod';
 // Reservation validation schema
 export const reservationSchema = z.object({
     customerName: z.string().min(2, { message: 'Il nome deve contenere almeno 2 caratteri' }),
-    customerPhone: z.string().regex(/^[0-9]{9,12}$/, { message: 'Inserisci un numero di telefono valido' }),
+    // Rendiamo il campo telefono opzionale: accettiamo stringa vuota oppure un numero valido (9-12 cifre)
+    customerPhone: z.string().regex(/(^$)|(^[0-9]{9,12}$)/, { message: 'Inserisci un numero di telefono valido' }),
     customerEmail: z.string().email({ message: 'Inserisci un\'email valida' }).optional().or(z.literal('')),
     date: z.date(),
     time: z.string().min(1, { message: 'Seleziona un orario' }),
