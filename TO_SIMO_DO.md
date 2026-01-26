@@ -1,8 +1,7 @@
-# TO_SIMO_DO
+# TO SIMO DO
 
-This file tracks manual actions required by Simo after each implementation.
-
-## To Do
-[ ] Verify the new "Confirm" button for pending reservations in the UI.
-[ ] Try rescheduling a reservation using the "Edit" button.
-[ ] Try deleting a pending reservation.
+## Verification
+- [ ] **Check Date Filters**: Verify that the "Segmented Control" (Oggi, Domani, etc.) is centered and looks good on your screen.
+- [ ] **Test Weekend Logic**: Click "Weekend" and ensure it shows Saturday/Sunday of the *current* week.
+- [ ] **Test Confirmations**: Try to "Confirm" a pending reservation and ensure the popup appears.
+- [ ] **Mobile Responsiveness**: Resize the browser to mobile width and ensure the filters stack correctly.

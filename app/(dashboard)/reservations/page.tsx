@@ -16,6 +16,7 @@ import { useRestaurantSettings } from '@/lib/contexts/restaurant-settings-contex
 import { reservationsService } from '@/lib/supabase/services/reservations.service';
 import { checkIsToday, normalizeToMidnight } from '@/lib/utils/date-utils';
 import { addDays, endOfWeek, startOfWeek, isWithinInterval, endOfMonth, startOfMonth, isWeekend } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 type DateFilterType = 'today' | 'tomorrow' | 'weekend' | 'week' | 'month' | 'all';
 
@@ -91,10 +92,19 @@ export default function ReservationsPage() {
                 return d.getTime() === tomorrow.getTime();
             });
         } else if (dateFilter === 'weekend') {
-            // Logic for "next weekend" or "this weekend" if technically today is friday/sat/sun
-            // For simplicity, let's show any upcoming Friday/Saturday/Sunday in the near future (e.g. next 7 days)
-            // Or strictly "This Weekend"
-            filtered = filtered.filter(res => isWeekend(new Date(res.date)));
+            // Logic for "current/next weekend"
+            // If today is Sunday, we might want to show today.
+            // If today is Monday-Thursday, show upcoming Sat/Sun.
+            // If today is Friday/Sat/Sun, show this weekend.
+            const weekendStart = startOfWeek(today, { weekStartsOn: 1 }); // Monday
+            const saturday = addDays(weekendStart, 5);
+            const sunday = addDays(weekendStart, 6);
+
+            filtered = filtered.filter(res => {
+                const d = normalizeToMidnight(new Date(res.date));
+                // Check if date is Saturday or Sunday of THIS week
+                return d.getTime() === saturday.getTime() || d.getTime() === sunday.getTime();
+            });
         } else if (dateFilter === 'week') {
             const start = startOfWeek(today, { weekStartsOn: 1 }); // Monday
             const end = endOfWeek(today, { weekStartsOn: 1 });
@@ -262,26 +272,34 @@ export default function ReservationsPage() {
 
             {/* Filters */}
             <Card className="p-3 sm:p-4 border-none shadow-md bg-card/50 backdrop-blur-sm space-y-4">
-                {/* Date Quick Filters (Chips) */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
-                    <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    {[
-                        { label: 'Oggi', value: 'today' },
-                        { label: 'Domani', value: 'tomorrow' },
-                        { label: 'Weekend', value: 'weekend' },
-                        { label: 'Settimana', value: 'week' },
-                        { label: 'Mese', value: 'month' },
-                        { label: 'Tutti', value: 'all' },
-                    ].map((filter) => (
-                        <Badge
-                            key={filter.value}
-                            variant={dateFilter === filter.value ? 'default' : 'outline'}
-                            className="cursor-pointer hover:bg-primary/90 px-3 py-1 text-sm font-medium transition-colors whitespace-nowrap"
-                            onClick={() => setDateFilter(filter.value as DateFilterType)}
-                        >
-                            {filter.label}
-                        </Badge>
-                    ))}
+                {/* Date Quick Filters (Segmented Control Style) */}
+                <div className="w-full overflow-x-auto pb-2 sm:pb-0 scrollbar-hide flex sm:justify-center">
+                    <div className="inline-flex bg-muted/50 p-1 rounded-full border border-border/50 shadow-inner min-w-full sm:min-w-0">
+                        {[
+                            { label: 'Oggi', value: 'today' },
+                            { label: 'Domani', value: 'tomorrow' },
+                            { label: 'Weekend', value: 'weekend' },
+                            { label: 'Settimana', value: 'week' },
+                            { label: 'Mese', value: 'month' },
+                            { label: 'Tutti', value: 'all' },
+                        ].map((filter) => {
+                            const isActive = dateFilter === filter.value;
+                            return (
+                                <button
+                                    key={filter.value}
+                                    onClick={() => setDateFilter(filter.value as DateFilterType)}
+                                    className={cn(
+                                        "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap flex-1 sm:flex-none text-center",
+                                        isActive
+                                            ? "bg-background text-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+                                            : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                                    )}
+                                >
+                                    {filter.label}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 <div className="flex flex-col gap-3">
@@ -306,7 +324,7 @@ export default function ReservationsPage() {
                         {/* Selectors Row */}
                         <div className="flex gap-2 sm:gap-3 flex-shrink-0">
                             <Select value={serviceFilter} onValueChange={(value) => setServiceFilter(value as ServiceType | 'all')}>
-                                <SelectTrigger className="h-10 w-[140px] bg-background/50 text-sm">
+                                <SelectTrigger className="h-10 data-[size=default]:h-10 w-[140px] bg-background/50 text-sm">
                                     <SelectValue placeholder="Servizio" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -317,7 +335,7 @@ export default function ReservationsPage() {
                             </Select>
 
                             <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as ReservationStatus | 'all')}>
-                                <SelectTrigger className="h-10 w-[140px] bg-background/50 text-sm">
+                                <SelectTrigger className="h-10 data-[size=default]:h-10 w-[140px] bg-background/50 text-sm">
                                     <SelectValue placeholder="Stato" />
                                 </SelectTrigger>
                                 <SelectContent>
