@@ -130,6 +130,19 @@ export default function ReservationsPage() {
         }
     };
 
+    const handleConfirm = async (reservation: Reservation) => {
+        if (!restaurant) return;
+
+        try {
+            await reservationsService.updateReservation(reservation.id, { status: 'confirmed' });
+            toast.success('Prenotazione confermata con successo');
+            await loadReservations();
+        } catch (error) {
+            console.error('Error confirming reservation:', error);
+            toast.error('Errore durante la conferma');
+        }
+    };
+
     const handleSave = async (data: Partial<Reservation>) => {
         if (!restaurant) return;
 
@@ -179,7 +192,14 @@ export default function ReservationsPage() {
 
             {/* Statistics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="p-4">
+                <Card
+                    className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => {
+                        setSearchQuery('');
+                        setServiceFilter('all');
+                        setStatusFilter('all');
+                    }}
+                >
                     <div className="text-2xl font-bold">{stats.total}</div>
                     <div className="text-sm text-muted-foreground">Totali</div>
                 </Card>
@@ -191,7 +211,14 @@ export default function ReservationsPage() {
                     <div className="text-2xl font-bold text-blue-600">{stats.upcoming}</div>
                     <div className="text-sm text-muted-foreground">In Arrivo</div>
                 </Card>
-                <Card className="p-4">
+                <Card
+                    className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => {
+                        setSearchQuery('');
+                        setServiceFilter('all');
+                        setStatusFilter('pending');
+                    }}
+                >
                     <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
                     <div className="text-sm text-muted-foreground">Da Confermare</div>
                 </Card>
@@ -303,6 +330,7 @@ export default function ReservationsPage() {
                                 reservation={reservation}
                                 onEdit={handleEdit}
                                 onDelete={handleDelete}
+                                onConfirm={handleConfirm}
                             />
                         ))}
                     </div>

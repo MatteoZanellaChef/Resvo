@@ -333,8 +333,12 @@ export function ReservationFormDialog({
                             <SelectContent>
                                 <SelectItem value="confirmed">Confermata</SelectItem>
                                 <SelectItem value="pending">In Attesa</SelectItem>
-                                <SelectItem value="cancelled">Cancellata</SelectItem>
-                                <SelectItem value="completed">Completata</SelectItem>
+                                {!!reservation?.id && (
+                                    <>
+                                        <SelectItem value="cancelled">Cancellata</SelectItem>
+                                        <SelectItem value="completed">Completata</SelectItem>
+                                    </>
+                                )}
                             </SelectContent>
                         </Select>
                     </div>

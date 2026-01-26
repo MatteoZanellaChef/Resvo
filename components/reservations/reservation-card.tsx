@@ -7,16 +7,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils/date-utils';
 import { STATUS_COLORS } from '@/lib/constants';
-import { Users, Phone, Mail, Clock, UtensilsCrossed, Edit, Trash2 } from 'lucide-react';
+import { Users, Phone, Mail, Clock, UtensilsCrossed, Edit, Trash2, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ReservationCardProps {
     reservation: Reservation;
     onEdit: (reservation: Reservation) => void;
     onDelete: (id: string) => void;
+    onConfirm: (reservation: Reservation) => void;
 }
 
-export function ReservationCard({ reservation, onEdit, onDelete }: ReservationCardProps) {
+export function ReservationCard({ reservation, onEdit, onDelete, onConfirm }: ReservationCardProps) {
     const statusLabel = {
         confirmed: 'Confermata',
         pending: 'In Attesa',
@@ -92,20 +94,56 @@ export function ReservationCard({ reservation, onEdit, onDelete }: ReservationCa
 
                 {/* Actions */}
                 <div className="flex flex-col gap-1">
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => onEdit(reservation)}
-                    >
-                        <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => setIsConfirmOpen(true)}
-                    >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <TooltipProvider>
+                        {reservation.status === 'pending' && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                        onClick={() => onConfirm(reservation)}
+                                    >
+                                        <Check className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Conferma Prenotazione</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        )}
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => onEdit(reservation)}
+                                >
+                                    <Edit className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Modifica / Sposta</p>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="text-destructive hover:bg-destructive/10"
+                                    onClick={() => setIsConfirmOpen(true)}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Elimina</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
             </div>
 
