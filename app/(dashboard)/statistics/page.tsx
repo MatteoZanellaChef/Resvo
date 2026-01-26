@@ -68,7 +68,7 @@ export default function StatisticsPage() {
     );
 
     const fetchReservations = useCallback(async () => {
-        if (!restaurant) return;
+        if (!restaurant?.id) return;
 
         try {
             setIsLoading(true);

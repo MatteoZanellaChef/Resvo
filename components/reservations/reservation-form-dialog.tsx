@@ -278,7 +278,7 @@ export function ReservationFormDialog({
                                                     variant="outline"
                                                     className={cn(
                                                         'w-full justify-start text-left font-normal bg-white dark:bg-slate-900 h-9',
-                                                        !selectedDate && 'text-muted-foreground',
+                                                        !watchedDate && 'text-muted-foreground',
                                                         errors.date && "border-destructive ring-1 ring-destructive"
                                                     )}
                                                 >

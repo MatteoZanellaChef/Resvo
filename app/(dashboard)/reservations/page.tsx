@@ -63,7 +63,7 @@ export default function ReservationsPage() {
     }, [settingsLoading, isLoadingReservations]);
 
     const loadReservations = useCallback(async () => {
-        if (!restaurant) return;
+        if (!restaurant?.id) return;
 
         try {
             setIsLoadingReservations(true);
