@@ -18,3 +18,8 @@ The booking management system allows full control over reservation lifecycles.
 - **Edit**: Fully editable via the "Edit" button.
 - **Delete**: Can be removed if necessary.
 
+### List Organization & Filters
+- **Grouping**: Reservations are now grouped by Date.
+- **Quick Filters**: Use the chips (Oggi, Domani, Weekend, etc.) to quickly filter by date range.
+- **Interactive Stats**: Click on "Oggi" or "In Arrivo" cards to apply instant filters.
+

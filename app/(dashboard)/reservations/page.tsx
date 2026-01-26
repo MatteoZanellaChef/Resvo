@@ -2,17 +2,22 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Reservation, ServiceType, ReservationStatus } from '@/types';
-import { ReservationCard } from '@/components/reservations/reservation-card';
 import { ReservationFormDialog } from '@/components/reservations/reservation-form-dialog';
+import { ReservationListGrouped } from '@/components/reservations/reservation-list-grouped';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
-import { Plus, Search, Filter, Loader2, X } from 'lucide-react';
+import { Plus, Search, Filter, Loader2, X, Calendar } from 'lucide-react';
 import { useRestaurantSettings } from '@/lib/contexts/restaurant-settings-context';
 import { reservationsService } from '@/lib/supabase/services/reservations.service';
+import { checkIsToday, normalizeToMidnight } from '@/lib/utils/date-utils';
+import { addDays, endOfWeek, startOfWeek, isWithinInterval, endOfMonth, startOfMonth, isWeekend } from 'date-fns';
+
+type DateFilterType = 'today' | 'tomorrow' | 'weekend' | 'week' | 'month' | 'all';
 
 export default function ReservationsPage() {
     const { restaurant, isLoading: settingsLoading } = useRestaurantSettings();
@@ -25,7 +30,7 @@ export default function ReservationsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [serviceFilter, setServiceFilter] = useState<ServiceType | 'all'>('all');
     const [statusFilter, setStatusFilter] = useState<ReservationStatus | 'all'>('all');
-    const [sortBy, setSortBy] = useState<'date' | 'time'>('date');
+    const [dateFilter, setDateFilter] = useState<DateFilterType>('today'); // Default to Today
 
     const loadReservations = useCallback(async () => {
         if (!restaurant) return;
@@ -74,18 +79,41 @@ export default function ReservationsPage() {
             filtered = filtered.filter((res) => res.status === statusFilter);
         }
 
-        // Sort
+        // Filter by Date Logic
+        const today = normalizeToMidnight(new Date());
+
+        if (dateFilter === 'today') {
+            filtered = filtered.filter(res => checkIsToday(new Date(res.date)));
+        } else if (dateFilter === 'tomorrow') {
+            const tomorrow = addDays(today, 1);
+            filtered = filtered.filter(res => {
+                const d = normalizeToMidnight(new Date(res.date));
+                return d.getTime() === tomorrow.getTime();
+            });
+        } else if (dateFilter === 'weekend') {
+            // Logic for "next weekend" or "this weekend" if technically today is friday/sat/sun
+            // For simplicity, let's show any upcoming Friday/Saturday/Sunday in the near future (e.g. next 7 days)
+            // Or strictly "This Weekend"
+            filtered = filtered.filter(res => isWeekend(new Date(res.date)));
+        } else if (dateFilter === 'week') {
+            const start = startOfWeek(today, { weekStartsOn: 1 }); // Monday
+            const end = endOfWeek(today, { weekStartsOn: 1 });
+            filtered = filtered.filter(res => isWithinInterval(new Date(res.date), { start, end }));
+        } else if (dateFilter === 'month') {
+            const start = startOfMonth(today);
+            const end = endOfMonth(today);
+            filtered = filtered.filter(res => isWithinInterval(new Date(res.date), { start, end }));
+        }
+
+        // Sort by Date then Time
         filtered.sort((a, b) => {
-            if (sortBy === 'date') {
-                const dateCompare = new Date(a.date).getTime() - new Date(b.date).getTime();
-                if (dateCompare !== 0) return dateCompare;
-                return a.time.localeCompare(b.time);
-            }
+            const dateCompare = new Date(a.date).getTime() - new Date(b.date).getTime();
+            if (dateCompare !== 0) return dateCompare;
             return a.time.localeCompare(b.time);
         });
 
         return filtered;
-    }, [reservations, searchQuery, serviceFilter, statusFilter, sortBy]);
+    }, [reservations, searchQuery, serviceFilter, statusFilter, dateFilter]);
 
     // Statistics
     const stats = useMemo(() => {
@@ -198,16 +226,23 @@ export default function ReservationsPage() {
                         setSearchQuery('');
                         setServiceFilter('all');
                         setStatusFilter('all');
+                        setDateFilter('all');
                     }}
                 >
                     <div className="text-2xl font-bold">{stats.total}</div>
                     <div className="text-sm text-muted-foreground">Totali</div>
                 </Card>
-                <Card className="p-4">
+                <Card
+                    className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => setDateFilter('today')}
+                >
                     <div className="text-2xl font-bold text-green-600">{stats.today}</div>
                     <div className="text-sm text-muted-foreground">Oggi</div>
                 </Card>
-                <Card className="p-4">
+                <Card
+                    className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => setDateFilter('all')} // Or 'tomorrow'/'week' depending on preference, 'all' for upcoming usually implies future
+                >
                     <div className="text-2xl font-bold text-blue-600">{stats.upcoming}</div>
                     <div className="text-sm text-muted-foreground">In Arrivo</div>
                 </Card>
@@ -217,6 +252,7 @@ export default function ReservationsPage() {
                         setSearchQuery('');
                         setServiceFilter('all');
                         setStatusFilter('pending');
+                        setDateFilter('all');
                     }}
                 >
                     <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
@@ -225,19 +261,41 @@ export default function ReservationsPage() {
             </div>
 
             {/* Filters */}
-            <Card className="p-3 sm:p-4 border-none shadow-md bg-card/50 backdrop-blur-sm">
+            <Card className="p-3 sm:p-4 border-none shadow-md bg-card/50 backdrop-blur-sm space-y-4">
+                {/* Date Quick Filters (Chips) */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+                    <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    {[
+                        { label: 'Oggi', value: 'today' },
+                        { label: 'Domani', value: 'tomorrow' },
+                        { label: 'Weekend', value: 'weekend' },
+                        { label: 'Settimana', value: 'week' },
+                        { label: 'Mese', value: 'month' },
+                        { label: 'Tutti', value: 'all' },
+                    ].map((filter) => (
+                        <Badge
+                            key={filter.value}
+                            variant={dateFilter === filter.value ? 'default' : 'outline'}
+                            className="cursor-pointer hover:bg-primary/90 px-3 py-1 text-sm font-medium transition-colors whitespace-nowrap"
+                            onClick={() => setDateFilter(filter.value as DateFilterType)}
+                        >
+                            {filter.label}
+                        </Badge>
+                    ))}
+                </div>
+
                 <div className="flex flex-col gap-3">
                     {/* Header */}
                     <div className="flex items-center gap-2">
                         <Filter className="h-4 w-4 text-primary" />
-                        <h3 className="font-semibold text-sm sm:text-base">Filtri</h3>
+                        <h3 className="font-semibold text-sm sm:text-base">Filtri Avanzati</h3>
                     </div>
 
                     {/* Search - Full width */}
                     <div className="relative w-full">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Cerca..."
+                            placeholder="Cerca cliente..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-9 bg-background/50 h-11 sm:h-10"
@@ -266,20 +324,21 @@ export default function ReservationsPage() {
                                     <SelectItem value="all">Tutti</SelectItem>
                                     <SelectItem value="confirmed">Confermate</SelectItem>
                                     <SelectItem value="pending">In Attesa</SelectItem>
-                                    <SelectItem value="cancelled">Cancellate</SelectItem>
-                                    <SelectItem value="completed">Completate</SelectItem>
+                                    <SelectItem value="cancelled">Cancellata</SelectItem>
+                                    <SelectItem value="completed">Completata</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         {/* Reset Button */}
-                        {(searchQuery || serviceFilter !== 'all' || statusFilter !== 'all') && (
+                        {(searchQuery || serviceFilter !== 'all' || statusFilter !== 'all' || dateFilter !== 'today') && (
                             <Button
                                 variant="outline"
                                 onClick={() => {
                                     setSearchQuery('');
                                     setServiceFilter('all');
                                     setStatusFilter('all');
+                                    setDateFilter('today');
                                 }}
                                 className="h-11 sm:h-10 w-11 sm:w-10 flex-shrink-0 bg-background/50 p-0 flex items-center justify-center"
                                 title="Reset filtri"
@@ -291,51 +350,13 @@ export default function ReservationsPage() {
                 </div>
             </Card>
 
-            {/* Reservations List */}
-            <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">
-                        {filteredReservations.length} {filteredReservations.length === 1 ? 'Prenotazione' : 'Prenotazioni'}
-                    </h3>
-                    <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'date' | 'time')}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="date">Ordina per Data</SelectItem>
-                            <SelectItem value="time">Ordina per Orario</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                {filteredReservations.length === 0 ? (
-                    <Card className="p-12 text-center">
-                        <div className="text-6xl mb-4">📋</div>
-                        <h3 className="text-lg font-semibold mb-2">Nessuna prenotazione trovata</h3>
-                        <p className="text-muted-foreground mb-4">
-                            {searchQuery || serviceFilter !== 'all' || statusFilter !== 'all'
-                                ? 'Prova a modificare i filtri di ricerca'
-                                : 'Inizia creando una nuova prenotazione'}
-                        </p>
-                        <Button onClick={handleAddNew}>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Crea Prenotazione
-                        </Button>
-                    </Card>
-                ) : (
-                    <div className="space-y-3">
-                        {filteredReservations.map((reservation) => (
-                            <ReservationCard
-                                key={reservation.id}
-                                reservation={reservation}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                                onConfirm={handleConfirm}
-                            />
-                        ))}
-                    </div>
-                )}
-            </div>
+            {/* Reservations List (Grouped) */}
+            <ReservationListGrouped
+                reservations={filteredReservations}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onConfirm={handleConfirm}
+            />
 
             {/* Form Dialog */}
             <ReservationFormDialog

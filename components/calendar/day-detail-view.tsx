@@ -155,7 +155,7 @@ export function DayDetailView({
                                     className={cn(
                                         'p-3 transition-all duration-200 hover:shadow-md border-l-4',
                                         reservation.status === 'confirmed' && 'border-l-green-500',
-                                        reservation.status === 'pending' && 'border-l-yellow-500',
+                                        reservation.status === 'pending' && 'border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-900/10',
                                         reservation.status === 'cancelled' && 'border-l-red-500'
                                     )}
                                 >
