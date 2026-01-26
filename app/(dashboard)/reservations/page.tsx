@@ -291,22 +291,22 @@ export default function ReservationsPage() {
                         <h3 className="font-semibold text-sm sm:text-base">Filtri Avanzati</h3>
                     </div>
 
-                    {/* Search - Full width */}
-                    <div className="relative w-full">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Cerca cliente..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-9 bg-background/50 h-11 sm:h-10"
-                        />
-                    </div>
+                    <div className="flex flex-col md:flex-row gap-3">
+                        {/* Search - Grows on desktop */}
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Cerca cliente..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-9 bg-background/50 h-10 w-full"
+                            />
+                        </div>
 
-                    {/* Selectors + Reset Button */}
-                    <div className="flex gap-2 sm:gap-3">
-                        <div className="grid grid-cols-2 gap-2 sm:gap-3 flex-1">
+                        {/* Selectors Row */}
+                        <div className="flex gap-2 sm:gap-3 flex-shrink-0">
                             <Select value={serviceFilter} onValueChange={(value) => setServiceFilter(value as ServiceType | 'all')}>
-                                <SelectTrigger className="h-11 sm:h-10 bg-background/50 text-sm">
+                                <SelectTrigger className="h-10 w-[140px] bg-background/50 text-sm">
                                     <SelectValue placeholder="Servizio" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -317,7 +317,7 @@ export default function ReservationsPage() {
                             </Select>
 
                             <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as ReservationStatus | 'all')}>
-                                <SelectTrigger className="h-11 sm:h-10 bg-background/50 text-sm">
+                                <SelectTrigger className="h-10 w-[140px] bg-background/50 text-sm">
                                     <SelectValue placeholder="Stato" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -328,24 +328,24 @@ export default function ReservationsPage() {
                                     <SelectItem value="completed">Completata</SelectItem>
                                 </SelectContent>
                             </Select>
-                        </div>
 
-                        {/* Reset Button */}
-                        {(searchQuery || serviceFilter !== 'all' || statusFilter !== 'all' || dateFilter !== 'today') && (
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    setSearchQuery('');
-                                    setServiceFilter('all');
-                                    setStatusFilter('all');
-                                    setDateFilter('today');
-                                }}
-                                className="h-11 sm:h-10 w-11 sm:w-10 flex-shrink-0 bg-background/50 p-0 flex items-center justify-center"
-                                title="Reset filtri"
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
-                        )}
+                            {/* Reset Button */}
+                            {(searchQuery || serviceFilter !== 'all' || statusFilter !== 'all' || dateFilter !== 'today') && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setServiceFilter('all');
+                                        setStatusFilter('all');
+                                        setDateFilter('today');
+                                    }}
+                                    className="h-10 w-10 flex-shrink-0 bg-background/50 p-0 flex items-center justify-center"
+                                    title="Reset filtri"
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </Card>
