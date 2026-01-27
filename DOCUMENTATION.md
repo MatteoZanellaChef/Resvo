@@ -42,4 +42,23 @@ Updated the background color of the "Nuova Prenotazione" / "Modifica Prenotazion
         - Changed the sticky footer background from `dark:bg-slate-950` to `dark:bg-black`.
 
 ### Verification
-- Visual inspection should confirm a pure black background in dark mode for the reservation popup.
+
+# Implementation Documentation - Day View Reservation Acceptance
+
+## Date: 2026-01-27
+
+### Overview
+Implemented the ability to accept/confirm pending reservations directly from the Calendar "Day View" (Giorno), mirroring the functionality found in the main Reservations list.
+
+### Changes Implemented
+1.  **Day View Component (`components/calendar/day-view.tsx`)**:
+    -   Added a "Confirm" (Check icon) button to the reservation card actions.
+    -   Added a confirmation dialog that appears when clicking the confirm button.
+    -   Added `onConfirmReservation` prop to handle the status update.
+
+2.  **Dashboard Page (`app/(dashboard)/page.tsx`)**:
+    -   Implemented the `handleConfirmReservation` logic by reusing the existing `handleSaveReservation` function with status override.
+    -   Passed the handler to the `DayView` component.
+
+### Verification
+-   **Manual Test**: Navigate to Day View, find a pending reservation, click the check icon, confirm the dialog, and verify the status update.

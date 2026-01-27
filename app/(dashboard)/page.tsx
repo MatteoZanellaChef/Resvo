@@ -225,6 +225,9 @@ export default function HomePage() {
                         onAddReservation={handleAddReservation}
                         onEditReservation={handleEditReservation}
                         onDeleteReservation={handleDeleteReservation}
+                        onConfirmReservation={async (reservation) => {
+                            await handleSaveReservation({ ...reservation, status: 'confirmed' });
+                        }}
                         date={viewDate}
                         onDateChange={setViewDate}
                         greenThreshold={greenThreshold}

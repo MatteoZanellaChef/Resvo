@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-import { ChevronLeft, ChevronRight, Plus, Users, Phone, Clock, Edit, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Users, Phone, Clock, Edit, Trash2, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -19,6 +19,7 @@ interface DayViewProps {
     onEditReservation?: (reservation: Reservation) => void;
     onDeleteReservation?: (id: string) => void;
     onAddReservation?: (date: Date, service: ServiceType) => void;
+    onConfirmReservation?: (reservation: Reservation) => void;
     date: Date;
     onDateChange: (date: Date) => void;
     greenThreshold?: number;
@@ -33,6 +34,7 @@ export function DayView({
     onAddReservation,
     onEditReservation,
     onDeleteReservation,
+    onConfirmReservation,
     date,
     onDateChange,
     greenThreshold = 60,
@@ -110,6 +112,10 @@ export function DayView({
     const [isBottomActionsVisible, setIsBottomActionsVisible] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [reservationToDelete, setReservationToDelete] = useState<Reservation | null>(null);
+
+    // Confirmation dialog state
+    const [isStatusConfirmOpen, setIsStatusConfirmOpen] = useState(false);
+    const [reservationToConfirm, setReservationToConfirm] = useState<Reservation | null>(null);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -275,6 +281,19 @@ export function DayView({
                                     </div>
                                     {/* Actions (edit/delete) */}
                                     <div className="ml-3 flex-shrink-0 flex flex-col gap-1">
+                                        {reservation.status === 'pending' && onConfirmReservation && (
+                                            <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                onClick={() => {
+                                                    setReservationToConfirm(reservation);
+                                                    setIsStatusConfirmOpen(true);
+                                                }}
+                                            >
+                                                <Check className="h-4 w-4" />
+                                            </Button>
+                                        )}
                                         {onEditReservation && (
                                             <Button
                                                 size="icon"
@@ -325,6 +344,34 @@ export function DayView({
                             }}
                         >
                             Elimina
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isStatusConfirmOpen} onOpenChange={(open) => { if (!open) { setReservationToConfirm(null); } setIsStatusConfirmOpen(open); }}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Conferma Prenotazione</DialogTitle>
+                        <DialogDescription>
+                            Vuoi confermare la prenotazione di {reservationToConfirm?.customerName}?
+                            Lo stato passerà a &quot;Confermata&quot;.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex justify-end gap-2 pt-4">
+                        <Button variant="outline" onClick={() => { setIsStatusConfirmOpen(false); setReservationToConfirm(null); }}>Annulla</Button>
+                        <Button
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => {
+                                if (reservationToConfirm && onConfirmReservation) {
+                                    onConfirmReservation(reservationToConfirm);
+                                }
+                                setIsStatusConfirmOpen(false);
+                                setReservationToConfirm(null);
+                            }}
+                        >
+                            Conferma
                         </Button>
                     </div>
                 </DialogContent>
