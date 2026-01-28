@@ -106,3 +106,17 @@ Enhanced the Monthly Calendar view (`DayCell` component) to explicitly display t
     -   Verify top-right: Reservation count (number only, inside a badge).
     -   Verify bottom-left: Users icon + number (Covers).
     -   Verify responsiveness on mobile.
+
+# Implementation Documentation - Calendar Scroll Fix
+
+## Date: 2026-01-28
+
+### Overview
+Fixed an issue where the calendar month view was invalidating vertical scrolling on mobile devices. The underlying cause was the `touch-none` CSS class blocking all touch interactions.
+
+### Changes Implemented
+1.  **Calendar View (`components/calendar/calendar-view.tsx`)**:
+    -   Changed `touch-none` to `touch-pan-y` on the calendar grid container. This enables vertical scrolling (pan-y) while preserving the ability to capture horizontal swipes for month navigation.
+
+### Verification
+-   **Manual**: Open the calendar on a mobile device and verify that you can scroll down the page by dragging on the calendar grid.

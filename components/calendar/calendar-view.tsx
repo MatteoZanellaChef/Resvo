@@ -130,7 +130,7 @@ export function CalendarView({
             </div>
 
             {/* Calendar Grid */}
-            <div ref={calendarRef} className="bg-card rounded-lg border border-border p-2 sm:p-4 md:p-6 touch-none">
+            <div ref={calendarRef} className="bg-card rounded-lg border border-border p-2 sm:p-4 md:p-6 touch-pan-y">
                 {/* Days of week header */}
                 <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
                     {DAYS_OF_WEEK.map((day) => (
